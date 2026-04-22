@@ -1,0 +1,36 @@
+** sch_path: /foss/designs/project/DFF/DFF.sch
+.subckt DFF vdd RSTn D Q Qb CLK vss
+*.PININFO D:I CLK:I RSTn:I Q:O vdd:B vss:B Qb:O
+M1 net1 D net3 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 net1 D net2 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M3 net2 c vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M4 net3 cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M5 cbar CLK vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M6 cbar CLK vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M7 c cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M8 c cbar vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M11 net5 RSTn net4 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M12 net4 net6 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M13 net5 RSTn vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M14 net5 net6 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M15 net6 net1 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M16 net6 net1 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M21 net9 net7 net8 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M22 net8 RSTn vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M23 net9 net7 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M24 net9 RSTn vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M25 Q net9 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M26 Q net9 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M19 net7 net9 net11 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M20 net7 net9 net10 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M31 net10 c vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M32 net11 cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M35 net12 net9 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M36 net12 net9 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M37 Qb net12 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M38 Qb net12 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M9 net1 c net5 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M10 net1 cbar net5 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M17 net6 c net7 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M18 net6 cbar net7 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+.ends

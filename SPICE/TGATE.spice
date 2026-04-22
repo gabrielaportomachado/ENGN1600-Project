@@ -1,0 +1,8 @@
+** sch_path: /foss/designs/project/TGATE/TGATE.sch
+.subckt TGATE out c cbar in
+*.PININFO in:I out:O cbar:I c:I
+M1 out cbar in VDD pfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 out c in GND nfet_03v3 L=0.28u W=1u nf=1 m=1
+.ends
+.GLOBAL VDD
+.GLOBAL GND
