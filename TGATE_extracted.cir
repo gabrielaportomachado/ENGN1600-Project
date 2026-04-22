@@ -1,0 +1,11 @@
+* Extracted by KLayout with GF180MCU LVS runset on : 22/04/2026 21:01
+
+.SUBCKT TGATE vdd SW_IPGb in out cbar c gf180mcu_gnd
+M$1 SW_IPGb \$12 \$5 \$3 pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U
++ PD=3.3U
+M$2 out cbar in vdd pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$3 SW_IPGb \$12 \$1 gf180mcu_gnd nfet_03v3 L=0.28U W=0.5U AS=0.325P AD=0.315P
++ PS=2.3U PD=2.26U
+M$4 out c in gf180mcu_gnd nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.63P PS=3.26U
++ PD=3.26U
+.ENDS TGATE
