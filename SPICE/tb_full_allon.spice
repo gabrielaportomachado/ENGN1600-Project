@@ -1,0 +1,474 @@
+* tb_full_allon.spice -- top-level functional TB across all 16 channels
+*
+* Mirrors full.sch: 1 top-level DFF for MODE (-> MODE_cfg/MODE_cfgb), 16 row
+* instances each with their own EN, E, IPG, REC.  All 16 EN bits are asserted
+* simultaneously.  Each electrode E[i] is driven to a DISTINCT DC voltage so
+* any cross-channel coupling shows up as a wrong V(IPG[i])/V(REC[i]).
+*
+*   Test sequence (clock free-running at 20 MHz throughout):
+*     0     - 100 ns : RSTn=0 (all DFFs forced reset, no path)
+*     150   ns       : assert all 16 EN bits high
+*     ~200 ns        : first clock edge after EN -> EN_cfg[i]=1 for all i
+*     500   ns       : MODE_in flips 0 -> 1
+*     ~550 ns        : MODE_cfg/MODE_cfgb update on next clock
+*
+*   Sample windows:
+*     MODE=0 phase: t=480 ns  -> expect V(IPG[i]) ~= V_E[i],  V(REC[i]) ~= 0
+*     MODE=1 phase: t=780 ns  -> expect V(REC[i]) ~= V_E[i],  V(IPG[i]) ~= 0
+*
+* PASS criterion (per channel, both modes): |measured - expected| < 0.05 V
+* across all 64 checks (16 channels x 2 modes x {active, isolated}).
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row.spice
+
+* --- supply ---
+V_vdd vdd GND 3.3
+
+* --- top-level digital control ---
+V_RSTn RST_in  GND PWL(0 0   100n 0   100.001n 3.3   10u 3.3)
+V_clk  CLK_in  GND PULSE(0 3.3 0 1n 1n 25n 50n)
+V_MODE MODE_in GND PWL(0 0   500n 0   500.001n 3.3   10u 3.3)
+
+* --- top-level MODE register (DFF: vdd RSTn D Q Qb CLK vss) ---
+x_modedff vdd RST_in MODE_in MODE_cfg MODE_cfgb CLK_in GND DFF
+
+* --- 16 channel-enable bits, all asserted at 150 ns ---
+V_EN0  EN0_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN1  EN1_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN2  EN2_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN3  EN3_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN4  EN4_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN5  EN5_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN6  EN6_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN7  EN7_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN8  EN8_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN9  EN9_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN10 EN10_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN11 EN11_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN12 EN12_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN13 EN13_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN14 EN14_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN15 EN15_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+
+* --- 16 distinct DC electrode voltages: V_E[i] = 0.2 + i*0.2 V (range 0.2..3.2 V) ---
+V_E0  E0_in  GND DC 0.2
+V_E1  E1_in  GND DC 0.4
+V_E2  E2_in  GND DC 0.6
+V_E3  E3_in  GND DC 0.8
+V_E4  E4_in  GND DC 1.0
+V_E5  E5_in  GND DC 1.2
+V_E6  E6_in  GND DC 1.4
+V_E7  E7_in  GND DC 1.6
+V_E8  E8_in  GND DC 1.8
+V_E9  E9_in  GND DC 2.0
+V_E10 E10_in GND DC 2.2
+V_E11 E11_in GND DC 2.4
+V_E12 E12_in GND DC 2.6
+V_E13 E13_in GND DC 2.8
+V_E14 E14_in GND DC 3.0
+V_E15 E15_in GND DC 3.2
+
+* --- per-channel loads: 100k pull to GND + 10f cap (mimics realistic IPG/REC
+*     downstream: R chosen so divider ~unity and discharge RC = 1 ns).
+R_IPG0  IPG0  GND 100k
+R_REC0  REC0  GND 100k
+C_IPG0  IPG0  GND 10f
+C_REC0  REC0  GND 10f
+R_IPG1  IPG1  GND 100k
+R_REC1  REC1  GND 100k
+C_IPG1  IPG1  GND 10f
+C_REC1  REC1  GND 10f
+R_IPG2  IPG2  GND 100k
+R_REC2  REC2  GND 100k
+C_IPG2  IPG2  GND 10f
+C_REC2  REC2  GND 10f
+R_IPG3  IPG3  GND 100k
+R_REC3  REC3  GND 100k
+C_IPG3  IPG3  GND 10f
+C_REC3  REC3  GND 10f
+R_IPG4  IPG4  GND 100k
+R_REC4  REC4  GND 100k
+C_IPG4  IPG4  GND 10f
+C_REC4  REC4  GND 10f
+R_IPG5  IPG5  GND 100k
+R_REC5  REC5  GND 100k
+C_IPG5  IPG5  GND 10f
+C_REC5  REC5  GND 10f
+R_IPG6  IPG6  GND 100k
+R_REC6  REC6  GND 100k
+C_IPG6  IPG6  GND 10f
+C_REC6  REC6  GND 10f
+R_IPG7  IPG7  GND 100k
+R_REC7  REC7  GND 100k
+C_IPG7  IPG7  GND 10f
+C_REC7  REC7  GND 10f
+R_IPG8  IPG8  GND 100k
+R_REC8  REC8  GND 100k
+C_IPG8  IPG8  GND 10f
+C_REC8  REC8  GND 10f
+R_IPG9  IPG9  GND 100k
+R_REC9  REC9  GND 100k
+C_IPG9  IPG9  GND 10f
+C_REC9  REC9  GND 10f
+R_IPG10 IPG10 GND 100k
+R_REC10 REC10 GND 100k
+C_IPG10 IPG10 GND 10f
+C_REC10 REC10 GND 10f
+R_IPG11 IPG11 GND 100k
+R_REC11 REC11 GND 100k
+C_IPG11 IPG11 GND 10f
+C_REC11 REC11 GND 10f
+R_IPG12 IPG12 GND 100k
+R_REC12 REC12 GND 100k
+C_IPG12 IPG12 GND 10f
+C_REC12 REC12 GND 10f
+R_IPG13 IPG13 GND 100k
+R_REC13 REC13 GND 100k
+C_IPG13 IPG13 GND 10f
+C_REC13 REC13 GND 10f
+R_IPG14 IPG14 GND 100k
+R_REC14 REC14 GND 100k
+C_IPG14 IPG14 GND 10f
+C_REC14 REC14 GND 10f
+R_IPG15 IPG15 GND 100k
+R_REC15 REC15 GND 100k
+C_IPG15 IPG15 GND 10f
+C_REC15 REC15 GND 10f
+
+* --- 16 row instances (pin order: IPG MODEb EN EN_cfgb clk E MODE RSTn REC) ---
+xrow0  IPG0  MODE_cfgb EN0_in  EN_cfgb0  CLK_in E0_in  MODE_cfg RST_in REC0  row
+xrow1  IPG1  MODE_cfgb EN1_in  EN_cfgb1  CLK_in E1_in  MODE_cfg RST_in REC1  row
+xrow2  IPG2  MODE_cfgb EN2_in  EN_cfgb2  CLK_in E2_in  MODE_cfg RST_in REC2  row
+xrow3  IPG3  MODE_cfgb EN3_in  EN_cfgb3  CLK_in E3_in  MODE_cfg RST_in REC3  row
+xrow4  IPG4  MODE_cfgb EN4_in  EN_cfgb4  CLK_in E4_in  MODE_cfg RST_in REC4  row
+xrow5  IPG5  MODE_cfgb EN5_in  EN_cfgb5  CLK_in E5_in  MODE_cfg RST_in REC5  row
+xrow6  IPG6  MODE_cfgb EN6_in  EN_cfgb6  CLK_in E6_in  MODE_cfg RST_in REC6  row
+xrow7  IPG7  MODE_cfgb EN7_in  EN_cfgb7  CLK_in E7_in  MODE_cfg RST_in REC7  row
+xrow8  IPG8  MODE_cfgb EN8_in  EN_cfgb8  CLK_in E8_in  MODE_cfg RST_in REC8  row
+xrow9  IPG9  MODE_cfgb EN9_in  EN_cfgb9  CLK_in E9_in  MODE_cfg RST_in REC9  row
+xrow10 IPG10 MODE_cfgb EN10_in EN_cfgb10 CLK_in E10_in MODE_cfg RST_in REC10 row
+xrow11 IPG11 MODE_cfgb EN11_in EN_cfgb11 CLK_in E11_in MODE_cfg RST_in REC11 row
+xrow12 IPG12 MODE_cfgb EN12_in EN_cfgb12 CLK_in E12_in MODE_cfg RST_in REC12 row
+xrow13 IPG13 MODE_cfgb EN13_in EN_cfgb13 CLK_in E13_in MODE_cfg RST_in REC13 row
+xrow14 IPG14 MODE_cfgb EN14_in EN_cfgb14 CLK_in E14_in MODE_cfg RST_in REC14 row
+xrow15 IPG15 MODE_cfgb EN15_in EN_cfgb15 CLK_in E15_in MODE_cfg RST_in REC15 row
+
+.control
+save all
+tran 1n 800n
+
+* --- per-channel measurements at MODE=0 (t=480ns) and MODE=1 (t=780ns) ---
+* MODE=0 phase: IPG should follow E, REC should be near 0 (isolated, pulled to GND)
+meas tran ipg0_m0  find v(ipg0)  at=480n
+meas tran ipg1_m0  find v(ipg1)  at=480n
+meas tran ipg2_m0  find v(ipg2)  at=480n
+meas tran ipg3_m0  find v(ipg3)  at=480n
+meas tran ipg4_m0  find v(ipg4)  at=480n
+meas tran ipg5_m0  find v(ipg5)  at=480n
+meas tran ipg6_m0  find v(ipg6)  at=480n
+meas tran ipg7_m0  find v(ipg7)  at=480n
+meas tran ipg8_m0  find v(ipg8)  at=480n
+meas tran ipg9_m0  find v(ipg9)  at=480n
+meas tran ipg10_m0 find v(ipg10) at=480n
+meas tran ipg11_m0 find v(ipg11) at=480n
+meas tran ipg12_m0 find v(ipg12) at=480n
+meas tran ipg13_m0 find v(ipg13) at=480n
+meas tran ipg14_m0 find v(ipg14) at=480n
+meas tran ipg15_m0 find v(ipg15) at=480n
+
+meas tran rec0_m0  find v(rec0)  at=480n
+meas tran rec1_m0  find v(rec1)  at=480n
+meas tran rec2_m0  find v(rec2)  at=480n
+meas tran rec3_m0  find v(rec3)  at=480n
+meas tran rec4_m0  find v(rec4)  at=480n
+meas tran rec5_m0  find v(rec5)  at=480n
+meas tran rec6_m0  find v(rec6)  at=480n
+meas tran rec7_m0  find v(rec7)  at=480n
+meas tran rec8_m0  find v(rec8)  at=480n
+meas tran rec9_m0  find v(rec9)  at=480n
+meas tran rec10_m0 find v(rec10) at=480n
+meas tran rec11_m0 find v(rec11) at=480n
+meas tran rec12_m0 find v(rec12) at=480n
+meas tran rec13_m0 find v(rec13) at=480n
+meas tran rec14_m0 find v(rec14) at=480n
+meas tran rec15_m0 find v(rec15) at=480n
+
+* MODE=1 phase: REC should follow E, IPG should be near 0
+meas tran ipg0_m1  find v(ipg0)  at=780n
+meas tran ipg1_m1  find v(ipg1)  at=780n
+meas tran ipg2_m1  find v(ipg2)  at=780n
+meas tran ipg3_m1  find v(ipg3)  at=780n
+meas tran ipg4_m1  find v(ipg4)  at=780n
+meas tran ipg5_m1  find v(ipg5)  at=780n
+meas tran ipg6_m1  find v(ipg6)  at=780n
+meas tran ipg7_m1  find v(ipg7)  at=780n
+meas tran ipg8_m1  find v(ipg8)  at=780n
+meas tran ipg9_m1  find v(ipg9)  at=780n
+meas tran ipg10_m1 find v(ipg10) at=780n
+meas tran ipg11_m1 find v(ipg11) at=780n
+meas tran ipg12_m1 find v(ipg12) at=780n
+meas tran ipg13_m1 find v(ipg13) at=780n
+meas tran ipg14_m1 find v(ipg14) at=780n
+meas tran ipg15_m1 find v(ipg15) at=780n
+
+meas tran rec0_m1  find v(rec0)  at=780n
+meas tran rec1_m1  find v(rec1)  at=780n
+meas tran rec2_m1  find v(rec2)  at=780n
+meas tran rec3_m1  find v(rec3)  at=780n
+meas tran rec4_m1  find v(rec4)  at=780n
+meas tran rec5_m1  find v(rec5)  at=780n
+meas tran rec6_m1  find v(rec6)  at=780n
+meas tran rec7_m1  find v(rec7)  at=780n
+meas tran rec8_m1  find v(rec8)  at=780n
+meas tran rec9_m1  find v(rec9)  at=780n
+meas tran rec10_m1 find v(rec10) at=780n
+meas tran rec11_m1 find v(rec11) at=780n
+meas tran rec12_m1 find v(rec12) at=780n
+meas tran rec13_m1 find v(rec13) at=780n
+meas tran rec14_m1 find v(rec14) at=780n
+meas tran rec15_m1 find v(rec15) at=780n
+
+* --- pass/fail thresholds ---
+*  active path: V(out) within 20% of V_E[i] (TG Ron varies with input voltage,
+*               more drop near the supply rail).  Rules out misrouting.
+*  isolated path: |V(out)| < 0.05 V (output stays at GND through 100k load).
+*
+*  We just count fails directly via if-blocks; ngspice control comparisons
+*  inside `let` are inconsistent across releases, so explicit `if` is safest.
+
+let fails = 0
+
+* MODE=0 phase: V(IPG[i]) should be ~= V_E[i] = 0.2 + i*0.2
+if abs(ipg0_m0  - 0.2) > 0.2*0.2
+  let fails = fails+1
+  echo "FAIL ch0 MODE=0 IPG: $&ipg0_m0 vs 0.2"
+end
+if abs(ipg1_m0  - 0.4) > 0.2*0.4
+  let fails = fails+1
+  echo "FAIL ch1 MODE=0 IPG: $&ipg1_m0 vs 0.4"
+end
+if abs(ipg2_m0  - 0.6) > 0.2*0.6
+  let fails = fails+1
+  echo "FAIL ch2 MODE=0 IPG: $&ipg2_m0 vs 0.6"
+end
+if abs(ipg3_m0  - 0.8) > 0.2*0.8
+  let fails = fails+1
+  echo "FAIL ch3 MODE=0 IPG: $&ipg3_m0 vs 0.8"
+end
+if abs(ipg4_m0  - 1.0) > 0.2*1.0
+  let fails = fails+1
+  echo "FAIL ch4 MODE=0 IPG: $&ipg4_m0 vs 1.0"
+end
+if abs(ipg5_m0  - 1.2) > 0.2*1.2
+  let fails = fails+1
+  echo "FAIL ch5 MODE=0 IPG: $&ipg5_m0 vs 1.2"
+end
+if abs(ipg6_m0  - 1.4) > 0.2*1.4
+  let fails = fails+1
+  echo "FAIL ch6 MODE=0 IPG: $&ipg6_m0 vs 1.4"
+end
+if abs(ipg7_m0  - 1.6) > 0.2*1.6
+  let fails = fails+1
+  echo "FAIL ch7 MODE=0 IPG: $&ipg7_m0 vs 1.6"
+end
+if abs(ipg8_m0  - 1.8) > 0.2*1.8
+  let fails = fails+1
+  echo "FAIL ch8 MODE=0 IPG: $&ipg8_m0 vs 1.8"
+end
+if abs(ipg9_m0  - 2.0) > 0.2*2.0
+  let fails = fails+1
+  echo "FAIL ch9 MODE=0 IPG: $&ipg9_m0 vs 2.0"
+end
+if abs(ipg10_m0 - 2.2) > 0.2*2.2
+  let fails = fails+1
+  echo "FAIL ch10 MODE=0 IPG: $&ipg10_m0 vs 2.2"
+end
+if abs(ipg11_m0 - 2.4) > 0.2*2.4
+  let fails = fails+1
+  echo "FAIL ch11 MODE=0 IPG: $&ipg11_m0 vs 2.4"
+end
+if abs(ipg12_m0 - 2.6) > 0.2*2.6
+  let fails = fails+1
+  echo "FAIL ch12 MODE=0 IPG: $&ipg12_m0 vs 2.6"
+end
+if abs(ipg13_m0 - 2.8) > 0.2*2.8
+  let fails = fails+1
+  echo "FAIL ch13 MODE=0 IPG: $&ipg13_m0 vs 2.8"
+end
+if abs(ipg14_m0 - 3.0) > 0.2*3.0
+  let fails = fails+1
+  echo "FAIL ch14 MODE=0 IPG: $&ipg14_m0 vs 3.0"
+end
+if abs(ipg15_m0 - 3.2) > 0.2*3.2
+  let fails = fails+1
+  echo "FAIL ch15 MODE=0 IPG: $&ipg15_m0 vs 3.2"
+end
+
+* MODE=0 phase: V(REC[i]) should be ~= 0
+if abs(rec0_m0)  > 0.05
+  let fails = fails+1
+  echo "FAIL ch0 MODE=0 REC not isolated: $&rec0_m0"
+end
+if abs(rec1_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec2_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec3_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec4_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec5_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec6_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec7_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec8_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec9_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec10_m0) > 0.05
+  let fails = fails+1
+end
+if abs(rec11_m0) > 0.05
+  let fails = fails+1
+end
+if abs(rec12_m0) > 0.05
+  let fails = fails+1
+end
+if abs(rec13_m0) > 0.05
+  let fails = fails+1
+end
+if abs(rec14_m0) > 0.05
+  let fails = fails+1
+end
+if abs(rec15_m0) > 0.05
+  let fails = fails+1
+end
+
+* MODE=1 phase: V(IPG[i]) should be ~= 0
+if abs(ipg0_m1)  > 0.05
+  let fails = fails+1
+  echo "FAIL ch0 MODE=1 IPG not isolated: $&ipg0_m1"
+end
+if abs(ipg1_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg2_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg3_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg4_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg5_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg6_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg7_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg8_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg9_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg10_m1) > 0.05
+  let fails = fails+1
+end
+if abs(ipg11_m1) > 0.05
+  let fails = fails+1
+end
+if abs(ipg12_m1) > 0.05
+  let fails = fails+1
+end
+if abs(ipg13_m1) > 0.05
+  let fails = fails+1
+end
+if abs(ipg14_m1) > 0.05
+  let fails = fails+1
+end
+if abs(ipg15_m1) > 0.05
+  let fails = fails+1
+end
+
+* MODE=1 phase: V(REC[i]) should be ~= V_E[i]
+if abs(rec0_m1  - 0.2) > 0.2*0.2
+  let fails = fails+1
+  echo "FAIL ch0 MODE=1 REC: $&rec0_m1 vs 0.2"
+end
+if abs(rec1_m1  - 0.4) > 0.2*0.4
+  let fails = fails+1
+end
+if abs(rec2_m1  - 0.6) > 0.2*0.6
+  let fails = fails+1
+end
+if abs(rec3_m1  - 0.8) > 0.2*0.8
+  let fails = fails+1
+end
+if abs(rec4_m1  - 1.0) > 0.2*1.0
+  let fails = fails+1
+end
+if abs(rec5_m1  - 1.2) > 0.2*1.2
+  let fails = fails+1
+end
+if abs(rec6_m1  - 1.4) > 0.2*1.4
+  let fails = fails+1
+end
+if abs(rec7_m1  - 1.6) > 0.2*1.6
+  let fails = fails+1
+end
+if abs(rec8_m1  - 1.8) > 0.2*1.8
+  let fails = fails+1
+end
+if abs(rec9_m1  - 2.0) > 0.2*2.0
+  let fails = fails+1
+end
+if abs(rec10_m1 - 2.2) > 0.2*2.2
+  let fails = fails+1
+end
+if abs(rec11_m1 - 2.4) > 0.2*2.4
+  let fails = fails+1
+end
+if abs(rec12_m1 - 2.6) > 0.2*2.6
+  let fails = fails+1
+end
+if abs(rec13_m1 - 2.8) > 0.2*2.8
+  let fails = fails+1
+end
+if abs(rec14_m1 - 3.0) > 0.2*3.0
+  let fails = fails+1
+end
+if abs(rec15_m1 - 3.2) > 0.2*3.2
+  let fails = fails+1
+end
+
+let passing = 64 - fails
+echo ""
+echo "=== Full top-level (16 channels, all EN=1) summary ==="
+echo "passing: $&passing / 64"
+if $&fails = 0
+  echo "PASS_FULL_ALLON all 64 routing checks passed (no cross-channel coupling)"
+else
+  echo "FAIL_FULL_ALLON $&fails of 64 checks failed"
+end
+
+write tb_full_allon.raw
+.endc
+.end

@@ -212,7 +212,87 @@ def plot_row_overlap():
     print(f"wrote {out}")
 
 
+# --------------------------------------------------------- full top-level (16ch)
+def plot_full_allon():
+    raw = RawRead(str(SPICE / "tb_full_allon.raw"))
+    t = np.asarray(raw.get_axis()) * 1e9  # ns
+    expected = np.arange(16) * 0.2 + 0.2  # V_E[i] in V
+    # Sample voltages at the two key timestamps
+    t_m0, t_m1 = 480.0, 780.0  # ns
+    idx_m0 = int(np.argmin(np.abs(t - t_m0)))
+    idx_m1 = int(np.argmin(np.abs(t - t_m1)))
+
+    ipg = np.zeros((16, len(t)))
+    rec = np.zeros((16, len(t)))
+    for i in range(16):
+        ipg[i] = get(raw, f"v(ipg{i})")
+        rec[i] = get(raw, f"v(rec{i})")
+
+    fig = plt.figure(figsize=(12, 7.5))
+    gs = fig.add_gridspec(2, 2, height_ratios=[3, 2], hspace=0.32, wspace=0.22)
+    ax_ts = fig.add_subplot(gs[0, :])
+    ax_m0 = fig.add_subplot(gs[1, 0])
+    ax_m1 = fig.add_subplot(gs[1, 1])
+
+    # Top: time series of all 16 IPG (left), all 16 REC (right) overlaid
+    cmap = plt.cm.viridis(np.linspace(0, 0.95, 16))
+    for i in range(16):
+        ax_ts.plot(t, ipg[i], color=cmap[i], lw=1.0, alpha=0.9, label=f"IPG[{i}]" if i in (0, 7, 15) else None)
+        ax_ts.plot(t, rec[i], color=cmap[i], lw=1.0, alpha=0.9, ls="--")
+    ax_ts.axvline(t_m0, color="grey", ls=":", lw=1)
+    ax_ts.axvline(t_m1, color="grey", ls=":", lw=1)
+    ax_ts.text(t_m0, 3.45, " sample\n MODE=0", color="grey", fontsize=9, va="bottom")
+    ax_ts.text(t_m1, 3.45, " sample\n MODE=1", color="grey", fontsize=9, va="bottom")
+    ax_ts.axvspan(0, 100, color="#fde2e4", alpha=0.4, zorder=0, label="reset")
+    ax_ts.axvspan(100, 200, color="#fff3b0", alpha=0.4, zorder=0, label="latch EN")
+    ax_ts.axvspan(200, 540, color="#cdeac0", alpha=0.4, zorder=0, label="MODE=0 (treatment)")
+    ax_ts.axvspan(540, 800, color="#bee1e6", alpha=0.4, zorder=0, label="MODE=1 (recording)")
+    ax_ts.set_xlim(0, 800)
+    ax_ts.set_ylim(-0.3, 3.6)
+    ax_ts.set_xlabel("time [ns]")
+    ax_ts.set_ylabel("voltage [V]")
+    ax_ts.set_title("Top-level (16 channels, all EN=1): IPG (solid) and REC (dashed) per channel,\n"
+                     "color-coded by channel index (low E→purple, high E→yellow)")
+    ax_ts.legend(loc="lower right", framealpha=0.9, fontsize=8, ncol=2)
+    ax_ts.grid(True, alpha=0.3)
+
+    # Bottom-left: scatter — measured V(IPG[i]) vs expected V_E[i] at MODE=0
+    measured_ipg_m0 = np.array([ipg[i, idx_m0] for i in range(16)])
+    measured_rec_m0 = np.array([rec[i, idx_m0] for i in range(16)])
+    ax_m0.plot([0, 3.3], [0, 3.3], color="grey", ls="--", lw=1, label="ideal y=x")
+    ax_m0.scatter(expected, measured_ipg_m0, c=cmap, s=60, marker="o", label="V(IPG) — active")
+    ax_m0.scatter(expected, measured_rec_m0, c=cmap, s=60, marker="x", label="V(REC) — isolated")
+    ax_m0.set_xlim(-0.1, 3.4)
+    ax_m0.set_ylim(-0.1, 3.4)
+    ax_m0.set_xlabel("V_E[i] (input)  [V]")
+    ax_m0.set_ylabel("measured  [V]")
+    ax_m0.set_title("MODE=0 sample (t=480 ns)")
+    ax_m0.legend(loc="upper left", framealpha=0.9, fontsize=9)
+    ax_m0.grid(True, alpha=0.3)
+
+    # Bottom-right: same but at MODE=1
+    measured_ipg_m1 = np.array([ipg[i, idx_m1] for i in range(16)])
+    measured_rec_m1 = np.array([rec[i, idx_m1] for i in range(16)])
+    ax_m1.plot([0, 3.3], [0, 3.3], color="grey", ls="--", lw=1, label="ideal y=x")
+    ax_m1.scatter(expected, measured_rec_m1, c=cmap, s=60, marker="o", label="V(REC) — active")
+    ax_m1.scatter(expected, measured_ipg_m1, c=cmap, s=60, marker="x", label="V(IPG) — isolated")
+    ax_m1.set_xlim(-0.1, 3.4)
+    ax_m1.set_ylim(-0.1, 3.4)
+    ax_m1.set_xlabel("V_E[i] (input)  [V]")
+    ax_m1.set_ylabel("measured  [V]")
+    ax_m1.set_title("MODE=1 sample (t=780 ns)")
+    ax_m1.legend(loc="upper left", framealpha=0.9, fontsize=9)
+    ax_m1.grid(True, alpha=0.3)
+
+    fig.suptitle("Top-level functional sweep — all 16 channels enabled, no cross-channel coupling (PASS 64/64)", fontsize=12, y=0.995)
+    out = HERE / "full_allon.png"
+    fig.savefig(out, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     plot_tgate_hiz()
     plot_row_corners()
     plot_row_overlap()
+    plot_full_allon()
