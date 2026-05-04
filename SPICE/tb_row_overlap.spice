@@ -1,0 +1,94 @@
+* tb_row_overlap.spice -- detect IPG/REC simultaneous-conduction during MODE switch
+*
+* Models the worst-case skew the row sees in full.sch: MODE_cfg comes from a top-level
+* DFF's Q output (1 INV from the latch state node), MODE_cfgb from Qb (one EXTRA INV
+* further), so MODEb lags MODE by ~one inverter delay.  We emulate that skew explicitly
+* with offset PWL edges on V_MODE and V_MODEb.
+*
+* Setup: EN_cfg pre-latched to 1, RSTn released.  E held at 3.0 V, while IPG and REC are
+* each pulled to GND via 10 kohm.  Steady state pre-transition: SW_IPG=1 -> IPG~2.7V,
+* SW_REC=0 -> REC~0V.  Steady state post-transition: SW_IPG=0 -> IPG~0V, SW_REC=1 ->
+* REC~2.7V.  During the overlap window both TGs may briefly conduct, allowing REC to
+* charge toward 2.7V while IPG has not yet discharged.  We measure
+* max(elementwise_min(v(IPG), v(REC))) -- if both are simultaneously >>0, the routing IC
+* is briefly shorting stim and recording paths.
+*
+* PASS criterion: overlap_max < 0.3 V across the MODE transition window.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row.spice
+
+* --- supplies ---
+V_vdd vdd GND 3.3
+
+* --- digital control sources (waveforms set in .control) ---
+V_EN    EN_in    GND 0
+V_RSTn  RST_in   GND 0
+V_clk   CLK_in   GND 0
+V_MODE  MODE_in  GND 0
+V_MODEb MODEb_in GND 3.3
+
+* --- E held at 3.0 V (DC), distinct from IPG/REC bias so any conduction is visible ---
+V_E E_in GND 3.0
+
+* --- IPG and REC each pulled to GND via 10k; small load cap mimics realistic load ---
+R_IPG IPG GND 10k
+R_REC REC GND 10k
+C_IPG IPG GND 10f
+C_REC REC GND 10f
+
+* --- DUT (pin order: IPG MODEb EN EN_cfgb clk E MODE RSTn REC) ---
+Xrow IPG MODEb_in EN_in EN_cfgb CLK_in E_in MODE_in RST_in REC row
+
+.control
+save all
+
+* --- bring-up: release reset @ 50ns, latch EN=1 with a clock pulse @ 100ns,
+*     then settle until 1us, then trigger the MODE transition at 1us.
+*     MODE rises 0->1 at 1us with 0.1ns edge (Q output is fast).
+*     MODEb falls 1->0 with the same edge speed but DELAYED by 200ps to mimic
+*     the extra INV stage between Q and Qb in the top-level DFF.
+*
+*     During [1us, 1us + 200ps]: MODE=1 AND MODEb=1 -> SW_IPG_pre = SW_REC_pre = 1
+*     -> with the current row.sch (no cross-coupling), both AND outputs go HIGH
+*     -> both TGs conduct.
+
+alter @V_RSTn[PWL] = [ 0 0  50n 0  50.001n 3.3  10u 3.3 ]
+alter @V_EN[PWL]   = [ 0 3.3  10u 3.3 ]
+alter @V_clk[PWL]  = [ 0 0  100n 0  100.001n 3.3  200n 3.3  200.001n 0  10u 0 ]
+
+* MODE rising edge at 1us, MODEb falling edge at 1us + 200ps (worst case skew)
+alter @V_MODE[PWL]  = [ 0 0    1u 0    1.0001u 3.3   10u 3.3 ]
+alter @V_MODEb[PWL] = [ 0 3.3  1.0002u 3.3  1.0003u 0     10u 0   ]
+
+* tight tstep around the transition for clean capture of any glitch
+tran 10p 1.5u 0 10p
+
+* element-wise minimum of v(ipg) and v(rec) using algebraic identity
+let overlap_v   = (v(ipg) + v(rec) - abs(v(ipg) - v(rec))) / 2
+let overlap_max = vecmax(overlap_v)
+
+* also report max of each individually as a sanity check on the steady states
+let ipg_max = vecmax(v(ipg))
+let rec_max = vecmax(v(rec))
+
+echo ""
+echo "=== Row overlap test (MODE 0->1 with 200ps Q/Qb skew) ==="
+echo "max v(IPG) over sim         = $&ipg_max V"
+echo "max v(REC) over sim         = $&rec_max V"
+echo "max( min(v(IPG), v(REC)) )  = $&overlap_max V   <-- overlap indicator"
+echo ""
+
+if $&overlap_max > 0.3
+  echo "FAIL_ROW_OVERLAP: both TGs simultaneously conduct (max-min = $&overlap_max V > 0.3V)"
+  echo "                  -> non-overlap / break-before-make logic is needed in row.sch"
+else
+  echo "PASS_ROW_OVERLAP: no simultaneous conduction observed (max-min = $&overlap_max V)"
+end
+
+* dump full time-domain data so we can plot the glitch with internal SW signals too
+write tb_row_overlap.raw
+
+.endc
+.end

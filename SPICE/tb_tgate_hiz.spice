@@ -1,0 +1,43 @@
+* tb_tgate_hiz.spice -- verify TGATE off-state is high-Z
+* PASS criterion: leakage current through input pin < 1 nA across full input sweep
+* when c=0V (NMOS gate off) and cbar=VDD (PMOS gate off).
+* Convention follows project TBs: GND is the reference (ngspice aliases GND <-> 0).
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/TGATE.spice
+
+* --- supply ---
+V_vdd VDD GND 3.3
+
+* --- off-state control: NMOS gate at GND, PMOS gate at VDD ---
+V_c    cnode    GND 0
+V_cbar cbarnode GND 3.3
+
+* --- input: voltage source so we can read i(V_in) as the off-state leakage ---
+V_in   innode   GND 0
+
+* --- output bias node: hold floating output near mid-rail via 100M to a stiff source ---
+V_bias biasnode GND 1.65
+Rbias  outnode  biasnode 100Meg
+
+* --- DUT (pin order: out c cbar in) ---
+Xtg outnode cnode cbarnode innode TGATE
+
+* --- DC sweep across the full rail ---
+.dc V_in 0 3.3 0.05
+
+.control
+save all
+run
+let ileak = abs(i(V_in))
+let imax  = vecmax(ileak)
+echo "TGATE off-state max leakage = $&imax A"
+if $&imax > 1e-9
+  echo "FAIL_TGATE_HIZ leakage exceeds 1nA threshold"
+else
+  echo "PASS_TGATE_HIZ leakage below 1nA"
+end
+write tb_tgate_hiz.raw
+.endc
+.end
