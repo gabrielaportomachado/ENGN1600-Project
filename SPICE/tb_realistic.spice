@@ -1,0 +1,175 @@
+* tb_realistic.spice -- realistic loads and waveforms for the routing row
+*
+* Models the actual analog environment around a single channel of the routing IC:
+*
+*   BRAIN side (E pin):
+*     V_brain  -- 100 uV LFP-like sine at 100 Hz, on a 1.65 V bias
+*     R_electrode = 1.5 kohm  -- DBS electrode-tissue impedance
+*
+*   IPG side (downstream pulse-generator chip):
+*     V_stim   -- biphasic pulse driver: +/-1.0 V around mid-rail
+*                 100 us cathodic + 100 us anodic, 1 kHz repetition during stim mode
+*                 (sped up from clinical ~130 Hz so we see >=5 pulses in the sim)
+*                 Held at 1.65 V (idle) when MODE=1 (recording)
+*     R_drv    = 100 ohm   -- active driver source impedance
+*     C_pad    = 2 pF      -- bond-pad / package parasitic
+*
+*   REC side (downstream neural recording amp):
+*     R_amp    = 1 Gohm to 1.65 V bias (high-Z amp input pulled to mid-rail)
+*     C_pad    = 2 pF
+*
+* Voltage caveat: the 3.3 V process here forces stim amplitude <= 1.65 V from
+* mid-rail.  Clinical DBS often exceeds 3.3 V across the electrode (1-10 mA
+* into 1-2 kohm tissue).  Going beyond 3.3 V on this routing IC requires
+* either 5 V (06v0) devices in this PDK, level shifters, or a different
+* topology -- flag for future work.
+*
+* DUT: original row (no fix).  Swap to row_fixed_dt for the fix-applied variant.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row.spice
+
+* --- supply ---
+V_vdd vdd GND 3.3
+
+* --- digital control ---
+V_RSTn RSTn_in GND PWL(0 0  100n 0  100.001n 3.3  30m 3.3)
+* single latching clock pulse at 200ns (after RSTn release + EN assert)
+V_clk  CLK_in  GND PWL(0 0  200n 0  200.001n 3.3  300n 3.3  300.001n 0  10m 0)
+V_EN   EN_in   GND PWL(0 0  150n 0  150.001n 3.3  30m 3.3)
+
+* Schedule:
+*   0    -> 4.7 ms : stim phase (5 biphasic pulses, 1 kHz, 0.5 ms apart)
+*   4.7  -> 15 ms  : C_dl drain through SW_IPG (V_stim at mid-rail, MODE still 0).
+*                    Drain tau = (R_drv+R_TG+R_s)*C_dl ~= 3.8k * 300n = 1.14 ms.
+*                    10 ms drain ~= 9 time constants -> residual < 0.02%.
+*                    This emulates the active-discharge phase real IPGs run.
+*   15   -> 30 ms  : record phase, 15 ms = 1 R_ct*C_dl tau, plenty of time for
+*                    any tiny residual to bleed off, LFP becomes the dominant pp.
+V_MODE  MODE_in  GND PWL(0 0    15m 0    15.0001m 3.3   30m 3.3)
+V_MODEb MODEb_in GND PWL(0 3.3  15m 3.3  15.0001m 0     30m 0)
+
+* --- BRAIN: Randles equivalent for the DBS electrode-tissue interface.
+*     R_s   = 1 kohm   spreading / bulk-tissue resistance
+*     C_dl  = 300 nF   electrochemical double-layer capacitance
+*     R_ct  = 50 kohm  charge-transfer resistance (Pt-Ir below water window)
+*     Topology:    brain_node --[R_s]-- tissue_node --(C_dl || R_ct)-- E_pin
+*     |Z| at 1 kHz: ~1.5 kohm (mostly C_dl path); at DC: ~51 kohm (R_s + R_ct)
+*
+*     LFP source: 100 uV sine at 1 kHz on 1.65 V bias.  1 kHz is at the upper
+*     edge of LFP / low MUA band -- chosen so a 4 ms record-phase measurement
+*     window captures multiple full cycles.  Real DBS beta-band is 13-30 Hz.
+V_brain brain_node GND SIN(1.65 100u 1k)
+R_s    brain_node tissue_node 1k
+C_dl   tissue_node E_pin 300n
+R_ct   tissue_node E_pin 50k
+
+* --- IPG side: biphasic stim pulses through 100 ohm driver impedance ---
+* Pulses centered at 0.5, 1.5, 2.5, 3.5, 4.5 ms during stim phase.
+* Each pulse: 100 us cathodic at 0.65 V, 100 us anodic at 2.65 V, then idle at 1.65 V.
+V_stim stim_drv GND PWL(
++ 0          1.65
++ 500u       1.65
++ 500.001u   0.65
++ 600u       0.65
++ 600.001u   2.65
++ 700u       2.65
++ 700.001u   1.65
++ 1500u      1.65
++ 1500.001u  0.65
++ 1600u      0.65
++ 1600.001u  2.65
++ 1700u      2.65
++ 1700.001u  1.65
++ 2500u      1.65
++ 2500.001u  0.65
++ 2600u      0.65
++ 2600.001u  2.65
++ 2700u      2.65
++ 2700.001u  1.65
++ 3500u      1.65
++ 3500.001u  0.65
++ 3600u      0.65
++ 3600.001u  2.65
++ 3700u      2.65
++ 3700.001u  1.65
++ 4500u      1.65
++ 4500.001u  0.65
++ 4600u      0.65
++ 4600.001u  2.65
++ 4700u      2.65
++ 4700.001u  1.65
++ 10m        1.65 )
+R_drv stim_drv IPG_pin 100
+C_pad_IPG IPG_pin GND 2p
+
+* --- REC side: 1 Gohm to 1.65 V mid-rail bias + 2 pF pad cap ---
+V_bias_amp bias_amp GND 1.65
+R_amp REC_pin bias_amp 1G
+C_pad_REC REC_pin GND 2p
+
+* --- DUT (pin order: IPG MODEb EN EN_cfgb clk E MODE RSTn REC) ---
+Xrow IPG_pin MODEb_in EN_in EN_cfgb CLK_in E_pin MODE_in RSTn_in REC_pin row
+
+.control
+save all
+
+tran 1u 30m 0 5u
+
+* --- stim-side measurements (during stim phase, MODE=0) ---
+* During the cathodic pulse of pulse 1 (500-600us), V(stim_drv)=0.65 V.
+* V(IPG_pin) should track V(stim_drv) closely (within driver+TG drop).
+meas tran v_stim_cath  avg v(stim_drv) from=550u to=600u
+meas tran v_ipg_cath   avg v(IPG_pin)  from=550u to=600u
+meas tran v_e_cath     avg v(E_pin)    from=550u to=600u
+
+* During anodic pulse 1 (600-700us), V(stim_drv)=2.65 V.
+meas tran v_stim_anod  avg v(stim_drv) from=650u to=700u
+meas tran v_ipg_anod   avg v(IPG_pin)  from=650u to=700u
+meas tran v_e_anod     avg v(E_pin)    from=650u to=700u
+
+* Crosstalk during stim: V(REC_pin) should sit near 1.65 V (no stim energy).
+meas tran v_rec_during_stim_max max v(REC_pin) from=400u to=14m
+meas tran v_rec_during_stim_min min v(REC_pin) from=400u to=14m
+
+* --- record-side measurements (during record phase, MODE=1) ---
+* Measure LFP in last 2 ms, after C_dl discharge transient settles (>= 1 RC).
+meas tran v_rec_rec_max max v(REC_pin) from=28m to=30m
+meas tran v_rec_rec_min min v(REC_pin) from=28m to=30m
+meas tran v_e_rec_max  max v(E_pin)    from=28m to=30m
+meas tran v_e_rec_min  min v(E_pin)    from=28m to=30m
+
+* Crosstalk during record: V(IPG_pin) should be quiet (stim driver idle).
+meas tran v_ipg_during_rec_max max v(IPG_pin) from=28m to=30m
+meas tran v_ipg_during_rec_min min v(IPG_pin) from=28m to=30m
+
+* Cdl drift indicator: V(E) right after MODE switch (post-drain) vs settled.
+meas tran v_e_initial find v(E_pin) at=15.001m
+meas tran v_e_settled find v(E_pin) at=29m
+
+let stim_pp_drv  = v_stim_anod - v_stim_cath
+let stim_pp_ipg  = v_ipg_anod  - v_ipg_cath
+let stim_pp_e    = v_e_anod    - v_e_cath
+let rec_pp_amp   = v_rec_rec_max - v_rec_rec_min
+let rec_pp_e     = v_e_rec_max   - v_e_rec_min
+let xtalk_rec_during_stim = v_rec_during_stim_max - v_rec_during_stim_min
+let xtalk_ipg_during_rec  = v_ipg_during_rec_max  - v_ipg_during_rec_min
+
+echo ""
+echo "===== Realistic-load testbench, single row =====
+"
+echo "STIM mode (MODE=0):"
+echo "  pp(stim_drv)  = $&stim_pp_drv V    (driver intent)"
+echo "  pp(IPG_pin)   = $&stim_pp_ipg V    (after R_drv loss)"
+echo "  pp(E_pin)     = $&stim_pp_e V    (after TG + electrode divider)"
+echo "  pp(REC_pin) crosstalk = $&xtalk_rec_during_stim V"
+echo ""
+echo "RECORD mode (MODE=1, measured t=28-30ms):"
+echo "  pp(E_pin)     = $&rec_pp_e V    (LFP source at brain)"
+echo "  pp(REC_pin)   = $&rec_pp_amp V    (LFP at amp input -- expect ~100 uV)"
+echo "  pp(IPG_pin) crosstalk = $&xtalk_ipg_during_rec V"
+
+write tb_realistic.raw
+.endc
+.end

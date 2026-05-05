@@ -1,0 +1,63 @@
+* row_fixed_dt.spice
+*
+* Same as row_fixed.spice (cross-coupled break-before-make) but ALSO inserts a
+* 4-INV delay chain on each cross-coupled feedback path.  This widens the
+* dead-time between SW_IPG dropping and SW_REC rising (and vice-versa) from
+* ~100 ps (one INV+AND) to ~300 ps, giving the analog node enough time to
+* discharge through its load before the opposite path conducts.
+*
+* Why 4 INVs (~200 ps additional)?
+*   The load-RC residual that limits row_fixed.spice is the time it takes
+*   V(IPG) to drain through the 10 kohm downstream load (RC = 100 ps).
+*   To cross the 0.3 V overlap threshold, V(IPG) must drop to e^(-1.86)*1.93 V,
+*   so dead time must be > 186 ps.  4 INVs (2 buffer pairs) gives ~200 ps,
+*   yielding ~300 ps total dead time and a comfortable margin.
+*
+* Important: only the FEEDBACK path is delayed.  The TG drive signals SW_IPGb
+* and SW_RECb still come straight off the existing INVs (x5/x7), so the
+* transmission gates still turn off as fast as before.  Only the moment when
+* the OTHER path is permitted to turn on is delayed.
+*
+* Per-row cost vs original row.sch:
+*   Original:        2 AND2 + 2 INV + 2 TG + 1 DFF
+*   row_fixed:       4 AND2 + 2 INV + 2 TG + 1 DFF (+2 AND2)
+*   row_fixed_dt:    4 AND2 + 10 INV + 2 TG + 1 DFF (+2 AND2, +8 INV)
+* Chip-wide (16 rows): +32 AND2, +128 INV.
+*
+* As with row_fixed.spice, this subckt is named distinctly (row_fixed_dt) so
+* it can coexist with row and row_fixed in the same simulation.
+
+.subckt row_fixed_dt IPG MODEb EN EN_cfgb clk E MODE RSTn REC
+
+* per-channel enable register (unchanged)
+x2 vdd RSTn EN EN_cfg EN_cfgb clk GND DFF
+
+* first-stage ANDs -- same as row_fixed
+x1 EN_cfg     SW_IPG_pre MODEb    AND
+x4 EN_cfg     SW_REC_pre MODE     AND
+
+* fast SWb generation: drives the TG immediately for fast turn-off
+x5 SW_IPGb SW_IPG INV
+x7 SW_RECb SW_REC INV
+
+* DELAY CHAIN on the IPG-side feedback (4 INVs = same polarity, ~200 ps later)
+x_id1 IPGb_d1 SW_IPGb INV
+x_id2 IPGb_d2 IPGb_d1 INV
+x_id3 IPGb_d3 IPGb_d2 INV
+x_id4 SW_IPGb_dt IPGb_d3 INV
+
+* DELAY CHAIN on the REC-side feedback
+x_rd1 RECb_d1 SW_RECb INV
+x_rd2 RECb_d2 RECb_d1 INV
+x_rd3 RECb_d3 RECb_d2 INV
+x_rd4 SW_RECb_dt RECb_d3 INV
+
+* second-stage ANDs use the DELAYED feedback; this enforces dead time
+x1b SW_IPG_pre SW_IPG SW_RECb_dt AND
+x4b SW_REC_pre SW_REC SW_IPGb_dt AND
+
+* analog switches (unchanged; gates are still SW_IPG/SW_IPGb fast-path)
+x3 IPG SW_IPG SW_IPGb E TGATE
+x6 REC SW_REC SW_RECb E TGATE
+
+.ends

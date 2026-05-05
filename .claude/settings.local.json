@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(docker exec *)"
+      "Bash(docker exec *)",
+      "Bash(cp /c/1600/ENGN1600-Project/tb_row_overlap_fixed.sch /c/Users/mclaw/eda/designs/ENGN1600-Project/)",
+      "Bash(cp /c/1600/ENGN1600-Project/tb_row_overlap_fixed_dt.sch /c/Users/mclaw/eda/designs/ENGN1600-Project/)"
     ]
   }
 }

@@ -291,8 +291,203 @@ def plot_full_allon():
     print(f"wrote {out}")
 
 
+# --------------------------------------- before/after overlap (current vs fix)
+def plot_overlap_compare():
+    raw_b = RawRead(str(SPICE / "tb_row_overlap.raw"))
+    raw_a = RawRead(str(SPICE / "tb_row_overlap_fixed.raw"))
+
+    def extract(raw):
+        t = np.asarray(raw.get_axis()) * 1e9  # ns
+        return dict(
+            t=t,
+            mode=get(raw, "v(mode_in)"),
+            modeb=get(raw, "v(modeb_in)"),
+            ipg=get(raw, "v(ipg)"),
+            rec=get(raw, "v(rec)"),
+        )
+
+    B = extract(raw_b)
+    A = extract(raw_a)
+
+    win_lo, win_hi = 999.5, 1003.0  # ns
+
+    fig = plt.figure(figsize=(13, 8))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1, 2.3, 2.3], hspace=0.35, wspace=0.18)
+    ax_dB = fig.add_subplot(gs[0, 0])
+    ax_dA = fig.add_subplot(gs[0, 1], sharey=ax_dB)
+    ax_aB = fig.add_subplot(gs[1, 0])
+    ax_aA = fig.add_subplot(gs[1, 1], sharey=ax_aB)
+    ax_zB = fig.add_subplot(gs[2, 0])
+    ax_zA = fig.add_subplot(gs[2, 1], sharey=ax_zB)
+
+    threshold = 0.3
+
+    def render_column(D, axd, axa, axz, title, color):
+        sel = (D["t"] >= win_lo) & (D["t"] <= win_hi)
+        t = D["t"]
+        # digital
+        axd.plot(t[sel], D["mode"][sel], color="C4", lw=2, label="V(MODE_cfg) - DFF Q")
+        axd.plot(t[sel], D["modeb"][sel], color="C5", lw=2, ls="--", label="V(MODE_cfgb) - DFF Qb (1 INV after Q)")
+        axd.set_title(title, fontsize=11, color=color, fontweight="bold")
+        axd.set_ylabel("digital [V]")
+        axd.set_ylim(-0.4, 3.7)
+        axd.set_xlim(win_lo, win_hi)
+        axd.grid(True, alpha=0.3)
+        axd.tick_params(labelbottom=False)
+
+        # analog full-scale
+        axa.plot(t[sel], D["ipg"][sel], color="C0", lw=2, label="V(IPG)")
+        axa.plot(t[sel], D["rec"][sel], color="C3", lw=2, label="V(REC)")
+        overlap = np.minimum(D["ipg"], D["rec"])
+        both = (D["ipg"] > threshold) & (D["rec"] > threshold) & sel
+        axa.fill_between(t, overlap, 0, where=both, color="red", alpha=0.30,
+                         label=f"both > {threshold} V")
+        axa.axhline(threshold, color="red", ls=":", lw=1, alpha=0.7)
+        omax = overlap[sel].max()
+        verdict = "FAIL" if omax > threshold else "PASS"
+        bg = "lightcoral" if omax > threshold else "lightgreen"
+        axa.text(0.02, 0.95,
+                 f"max( min(V(IPG), V(REC)) ) = {omax:.3f} V  ({verdict})",
+                 transform=axa.transAxes, va="top", fontsize=10,
+                 bbox=dict(boxstyle="round,pad=0.4", facecolor=bg, alpha=0.85))
+        axa.set_ylabel("voltage [V]")
+        axa.set_ylim(-0.1, 2.4)
+        axa.set_xlim(win_lo, win_hi)
+        axa.grid(True, alpha=0.3)
+        axa.tick_params(labelbottom=False)
+
+        # zoomed-in view of just the overlap band (or where the two traces cross)
+        axz.plot(t[sel], D["ipg"][sel], color="C0", lw=1.8, label="V(IPG)")
+        axz.plot(t[sel], D["rec"][sel], color="C3", lw=1.8, label="V(REC)")
+        axz.fill_between(t, overlap, 0, where=both, color="red", alpha=0.30)
+        axz.axhline(threshold, color="red", ls=":", lw=1, alpha=0.7,
+                    label=f"{threshold} V threshold")
+        axz.set_xlabel("time [ns]   (transition triggered at 1000 ns)")
+        axz.set_ylabel("voltage (zoom) [V]")
+        axz.set_ylim(-0.05, 0.7)
+        axz.set_xlim(win_lo, win_hi)
+        axz.grid(True, alpha=0.3)
+
+    render_column(B, ax_dB, ax_aB, ax_zB,
+                  "BEFORE: row.sch (current) — overlap glitch present", "C3")
+    render_column(A, ax_dA, ax_aA, ax_zA,
+                  "AFTER: row_fixed (cross-coupled) — gate-level overlap eliminated", "C2")
+
+    ax_dB.legend(loc="lower right", framealpha=0.9, fontsize=8)
+    ax_aB.legend(loc="upper right", framealpha=0.9, fontsize=8)
+    ax_zB.legend(loc="upper right", framealpha=0.9, fontsize=8)
+
+    fig.suptitle("Row overlap: current schematic vs cross-coupled break-before-make fix",
+                 fontsize=13, y=0.995)
+
+    # Add a compact summary line below the suptitle
+    fig.text(0.5, 0.955,
+             "Cross-coupling eliminates the gate-level cause (Cause 1).  Residual ~0.5 V is the load-RC effect (Cause 2) — needs a dead-time buffer chain.",
+             ha="center", fontsize=10, style="italic", color="#444")
+
+    out = HERE / "row_overlap_compare.png"
+    fig.savefig(out, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+# ---------------------------------------- realistic loads + neural waveforms
+def plot_realistic():
+    raw = RawRead(str(SPICE / "tb_realistic.raw"))
+    t = np.asarray(raw.get_axis()) * 1e3  # ms
+    v_stim_drv = get(raw, "v(stim_drv)")
+    v_ipg      = get(raw, "v(ipg_pin)")
+    v_e        = get(raw, "v(e_pin)")
+    v_rec      = get(raw, "v(rec_pin)")
+    v_brain    = get(raw, "v(brain_node)")
+
+    fig = plt.figure(figsize=(13, 9))
+    gs = fig.add_gridspec(3, 2, hspace=0.35, wspace=0.12,
+                          height_ratios=[1, 1, 1], width_ratios=[3, 2])
+
+    # ------ row 1: full transient (0-30 ms) showing stim, drain, record phases ------
+    ax_stim_full = fig.add_subplot(gs[0, :])
+    ax_stim_full.plot(t, v_stim_drv, color="grey",  lw=0.8, alpha=0.7, label="V(stim_drv) — driver intent")
+    ax_stim_full.plot(t, v_ipg,      color="C0",    lw=1.2, label="V(IPG_pin)")
+    ax_stim_full.plot(t, v_e,        color="C2",    lw=1.2, label="V(E_pin) — brain electrode")
+    ax_stim_full.plot(t, v_rec,      color="C3",    lw=1.2, label="V(REC_pin) — recording amp input")
+    ax_stim_full.axvspan(0, 4.7, color="#fde2e4", alpha=0.30, zorder=0)
+    ax_stim_full.axvspan(4.7, 15, color="#fff3b0", alpha=0.30, zorder=0)
+    ax_stim_full.axvspan(15, 30, color="#bee1e6", alpha=0.30, zorder=0)
+    ax_stim_full.text(2.4,  3.3, "MODE=0 stim\n5 biphasic pulses", ha="center", fontsize=9, color="#a44")
+    ax_stim_full.text(9.85, 3.3, "MODE=0 drain\n(C_dl bleeds via SW_IPG)", ha="center", fontsize=9, color="#a73")
+    ax_stim_full.text(22.5, 3.3, "MODE=1 record\n1 kHz LFP, 100 µV", ha="center", fontsize=9, color="#147")
+    ax_stim_full.set_xlim(0, 30)
+    ax_stim_full.set_ylim(-0.2, 3.6)
+    ax_stim_full.set_ylabel("V [V]")
+    ax_stim_full.set_title("Realistic-load TB with Randles electrode model — full 30 ms run")
+    ax_stim_full.legend(loc="lower center", framealpha=0.9, ncol=4, fontsize=9)
+    ax_stim_full.grid(True, alpha=0.3)
+
+    # ------ row 2: zoom into one stim pulse (cathodic + anodic) ------
+    ax_stim_zoom = fig.add_subplot(gs[1, 0])
+    sel_stim = (t >= 0.45) & (t <= 0.85)
+    ax_stim_zoom.plot(t[sel_stim], v_stim_drv[sel_stim], color="grey", lw=1.5, alpha=0.8, label="V(stim_drv)")
+    ax_stim_zoom.plot(t[sel_stim], v_ipg[sel_stim],      color="C0",   lw=1.8, label="V(IPG_pin)")
+    ax_stim_zoom.plot(t[sel_stim], v_e[sel_stim],        color="C2",   lw=1.8, label="V(E_pin)")
+    ax_stim_zoom.plot(t[sel_stim], v_rec[sel_stim],      color="C3",   lw=1.8, label="V(REC_pin)")
+    ax_stim_zoom.axhline(1.65, color="grey", ls=":", lw=0.8)
+    ax_stim_zoom.set_xlabel("time [ms]")
+    ax_stim_zoom.set_ylabel("V [V]")
+    ax_stim_zoom.set_title("Stim pulse 1 (zoom): TG drops ~70% of swing")
+    ax_stim_zoom.set_ylim(0.4, 2.9)
+    ax_stim_zoom.legend(loc="upper right", framealpha=0.9, fontsize=8)
+    ax_stim_zoom.grid(True, alpha=0.3)
+
+    # crosstalk panel (REC during stim+drain)
+    ax_xtalk_stim = fig.add_subplot(gs[1, 1])
+    sel_xtalk = (t >= 0) & (t <= 14)
+    ax_xtalk_stim.plot(t[sel_xtalk], (v_rec[sel_xtalk] - 1.65) * 1e6, color="C3", lw=1.4, label="V(REC) − 1.65 V")
+    ax_xtalk_stim.set_ylim(-50, 50)
+    ax_xtalk_stim.set_xlabel("time [ms]  (during stim+drain)")
+    ax_xtalk_stim.set_ylabel("[µV from bias]")
+    ax_xtalk_stim.set_title("Crosstalk: REC during stim")
+    ax_xtalk_stim.text(0.5, 40, "0 µV measured (perfect isolation)", fontsize=9, color="#080")
+    ax_xtalk_stim.grid(True, alpha=0.3)
+    ax_xtalk_stim.legend(loc="lower right", fontsize=8)
+
+    # ------ row 3: zoom into recording phase (post-drain) showing clean LFP ------
+    ax_rec_zoom = fig.add_subplot(gs[2, 0])
+    sel_rec = (t >= 28.0) & (t <= 30.0)
+    ax_rec_zoom.plot(t[sel_rec], (v_brain[sel_rec] - 1.65) * 1e6, color="grey", lw=1.0, alpha=0.7, label="V(brain) source")
+    ax_rec_zoom.plot(t[sel_rec], (v_e[sel_rec]     - 1.65) * 1e6, color="C2",   lw=1.6, label="V(E_pin)")
+    ax_rec_zoom.plot(t[sel_rec], (v_rec[sel_rec]   - 1.65) * 1e6, color="C3",   lw=1.6, ls="--", label="V(REC_pin)")
+    ax_rec_zoom.axhline(0, color="grey", ls=":", lw=0.8)
+    ax_rec_zoom.set_xlabel("time [ms]  (late record mode, post-drain)")
+    ax_rec_zoom.set_ylabel("[µV from bias]")
+    ax_rec_zoom.set_title("LFP transfer post-drain: brain → E → REC, <2% loss")
+    ax_rec_zoom.legend(loc="upper right", framealpha=0.9, fontsize=8)
+    ax_rec_zoom.grid(True, alpha=0.3)
+
+    # crosstalk panel (IPG during record)
+    ax_xtalk_rec = fig.add_subplot(gs[2, 1])
+    sel_xtalk2 = (t >= 15) & (t <= 30)
+    ax_xtalk_rec.plot(t[sel_xtalk2], (v_ipg[sel_xtalk2] - 1.65) * 1e6, color="C0", lw=1.4, label="V(IPG) − 1.65 V")
+    ax_xtalk_rec.set_ylim(-50, 50)
+    ax_xtalk_rec.set_xlabel("time [ms]  (during record)")
+    ax_xtalk_rec.set_ylabel("[µV from bias]")
+    ax_xtalk_rec.set_title("Crosstalk: IPG during record")
+    ax_xtalk_rec.text(15.5, 40, "0 µV measured (perfect isolation)", fontsize=9, color="#080")
+    ax_xtalk_rec.grid(True, alpha=0.3)
+    ax_xtalk_rec.legend(loc="lower right", fontsize=8)
+
+    fig.suptitle("Realistic loads — biphasic stim + LFP recording, 3.3 V supply", fontsize=12, y=0.995)
+
+    out = HERE / "realistic.png"
+    fig.savefig(out, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     plot_tgate_hiz()
     plot_row_corners()
     plot_row_overlap()
     plot_full_allon()
+    plot_overlap_compare()
+    plot_realistic()

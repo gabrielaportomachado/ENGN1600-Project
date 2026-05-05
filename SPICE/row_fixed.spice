@@ -1,0 +1,52 @@
+* row_fixed.spice
+*
+* Drop-in replacement for the row subcircuit that adds cross-coupled
+* break-before-make logic to the per-channel switch driver, eliminating the
+* MODE-transition overlap glitch that tb_row_overlap.spice catches.
+*
+* Naming: this subckt is called `row_fixed` (NOT `row`) so it can coexist
+* with the original row.spice in the same simulation.  Helper cells
+* (AND, DFF, INV, TGATE) are NOT redefined here -- they're expected to come
+* from row.spice (or the individual cell .spice files) included by the TB.
+*
+* Same port list as the original `row`, so a TB can swap one for the other
+* by changing only the X-instance line:
+*     Xrow IPG MODEb EN EN_cfgb clk E MODE RSTn REC row         <- original
+*     Xrow IPG MODEb EN EN_cfgb clk E MODE RSTn REC row_fixed   <- fixed
+*
+* Logic change vs row.spice:
+*     OLD:  SW_IPG = EN_cfg AND MODEb
+*           SW_REC = EN_cfg AND MODE
+*     NEW:  SW_IPG_pre = EN_cfg AND MODEb           (existing AND, renamed)
+*           SW_REC_pre = EN_cfg AND MODE            (existing AND, renamed)
+*           SW_IPG     = SW_IPG_pre AND SW_RECb     (NEW AND, x1b)
+*           SW_REC     = SW_REC_pre AND SW_IPGb     (NEW AND, x4b)
+*     The two existing INVs (x5/x7) keep producing SW_IPGb/SW_RECb from
+*     the FINAL SW signals, closing the cross-coupled feedback loop.
+*
+* Cost: +2 AND2 cells per row (32 chip-wide).  No port change, no new cell type.
+
+.subckt row_fixed IPG MODEb EN EN_cfgb clk E MODE RSTn REC
+*.PININFO EN:I clk:I MODEb:I MODE:I E:I IPG:O REC:O RSTn:I EN_cfgb:O
+
+* per-channel enable register (unchanged from row.spice)
+x2  vdd RSTn EN EN_cfg EN_cfgb clk GND DFF
+
+* first-stage ANDs -- intent (would-be SW_IPG/SW_REC if no skew protection)
+x1  EN_cfg     SW_IPG_pre MODEb    AND
+x4  EN_cfg     SW_REC_pre MODE     AND
+
+* second-stage ANDs -- enforce mutual exclusion via cross-coupled SWb feedback
+* SW_IPG can only be HIGH if SW_REC is currently LOW (so SW_RECb=HIGH), and vice versa.
+x1b SW_IPG_pre SW_IPG     SW_RECb  AND
+x4b SW_REC_pre SW_REC     SW_IPGb  AND
+
+* SWb generation (unchanged from row.spice -- now drives the cross-coupled feedback)
+x5  SW_IPGb SW_IPG INV
+x7  SW_RECb SW_REC INV
+
+* analog switches (unchanged from row.spice)
+x3  IPG SW_IPG SW_IPGb E TGATE
+x6  REC SW_REC SW_RECb E TGATE
+
+.ends
