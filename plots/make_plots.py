@@ -484,6 +484,91 @@ def plot_realistic():
     print(f"wrote {out}")
 
 
+# ------------------------------------------ full-chip TB (uses full.sch as DUT)
+def plot_full_chip():
+    raw_chip = RawRead(str(SPICE / "tb_full_chip.raw"))
+    raw_inline = RawRead(str(SPICE / "tb_full_allon.raw"))
+
+    t_chip = np.asarray(raw_chip.get_axis()) * 1e9  # ns
+    t_inline = np.asarray(raw_inline.get_axis()) * 1e9
+
+    expected = np.arange(16) * 0.2 + 0.2
+    t_m0, t_m1 = 480.0, 780.0
+
+    def gather(raw, name_pattern, t):
+        idx_m0 = int(np.argmin(np.abs(t - t_m0)))
+        idx_m1 = int(np.argmin(np.abs(t - t_m1)))
+        ipg = np.zeros((16, len(t)))
+        rec = np.zeros((16, len(t)))
+        for i in range(16):
+            ipg[i] = get(raw, f"v({name_pattern[0]}{i}{name_pattern[1]})")
+            rec[i] = get(raw, f"v({name_pattern[2]}{i}{name_pattern[3]})")
+        return ipg, rec, idx_m0, idx_m1
+
+    chip_ipg, chip_rec, idx_chip_m0, idx_chip_m1 = gather(raw_chip,   ("ipg", "_pin", "rec", "_pin"), t_chip)
+    inl_ipg,  inl_rec,  idx_inl_m0,  idx_inl_m1  = gather(raw_inline, ("ipg", "",     "rec", ""),     t_inline)
+
+    fig = plt.figure(figsize=(12, 7))
+    gs = fig.add_gridspec(2, 2, height_ratios=[3, 2], hspace=0.32, wspace=0.2)
+    ax_ts = fig.add_subplot(gs[0, :])
+    ax_m0 = fig.add_subplot(gs[1, 0])
+    ax_m1 = fig.add_subplot(gs[1, 1])
+
+    cmap = plt.cm.viridis(np.linspace(0, 0.95, 16))
+    for i in range(16):
+        ax_ts.plot(t_chip, chip_ipg[i], color=cmap[i], lw=1.0, alpha=0.9)
+        ax_ts.plot(t_chip, chip_rec[i], color=cmap[i], lw=1.0, alpha=0.9, ls="--")
+    ax_ts.axvspan(0,    100,  color="#fde2e4", alpha=0.4, zorder=0)
+    ax_ts.axvspan(100,  200,  color="#fff3b0", alpha=0.4, zorder=0)
+    ax_ts.axvspan(200,  540,  color="#cdeac0", alpha=0.4, zorder=0, label="MODE=0 (treatment)")
+    ax_ts.axvspan(540,  800,  color="#bee1e6", alpha=0.4, zorder=0, label="MODE=1 (recording)")
+    ax_ts.set_xlim(0, 800)
+    ax_ts.set_ylim(-0.3, 3.6)
+    ax_ts.set_xlabel("time [ns]")
+    ax_ts.set_ylabel("V [V]")
+    ax_ts.set_title("Full-chip TB (driving full.sch via single Xchip instance) — IPG (solid), REC (dashed)")
+    ax_ts.legend(loc="lower right", fontsize=9)
+    ax_ts.grid(True, alpha=0.3)
+
+    # cross-check scatter at MODE=0: x = inline value, y = chip value, should lie on y=x
+    chip_ipg_m0 = chip_ipg[:, idx_chip_m0]
+    inl_ipg_m0  = inl_ipg[:,  idx_inl_m0]
+    chip_rec_m1 = chip_rec[:, idx_chip_m1]
+    inl_rec_m1  = inl_rec[:,  idx_inl_m1]
+
+    ax_m0.plot([0, 3.3], [0, 3.3], color="grey", ls="--", lw=1, label="y=x (perfect agreement)")
+    ax_m0.scatter(inl_ipg_m0, chip_ipg_m0, c=cmap, s=70, marker="o", label="V(IPG) at t=480 ns")
+    ax_m0.set_xlabel("inline 16-row build  [V]")
+    ax_m0.set_ylabel("Xchip via full.sch  [V]")
+    ax_m0.set_title("MODE=0 cross-check (each dot = one channel)")
+    ax_m0.set_xlim(-0.1, 3.4)
+    ax_m0.set_ylim(-0.1, 3.4)
+    ax_m0.legend(loc="upper left", fontsize=9)
+    ax_m0.grid(True, alpha=0.3)
+
+    ax_m1.plot([0, 3.3], [0, 3.3], color="grey", ls="--", lw=1, label="y=x (perfect agreement)")
+    ax_m1.scatter(inl_rec_m1, chip_rec_m1, c=cmap, s=70, marker="o", label="V(REC) at t=780 ns")
+    ax_m1.set_xlabel("inline 16-row build  [V]")
+    ax_m1.set_ylabel("Xchip via full.sch  [V]")
+    ax_m1.set_title("MODE=1 cross-check")
+    ax_m1.set_xlim(-0.1, 3.4)
+    ax_m1.set_ylim(-0.1, 3.4)
+    ax_m1.legend(loc="upper left", fontsize=9)
+    ax_m1.grid(True, alpha=0.3)
+
+    # max abs difference for the report
+    max_diff_m0 = np.max(np.abs(chip_ipg_m0 - inl_ipg_m0))
+    max_diff_m1 = np.max(np.abs(chip_rec_m1 - inl_rec_m1))
+    fig.text(0.5, 0.93, f"max |chip − inline| = {max_diff_m0*1e6:.1f} µV (MODE=0),  "
+                       f"{max_diff_m1*1e6:.1f} µV (MODE=1) — full.sch wiring matches inline build",
+             ha="center", fontsize=10, style="italic", color="#080")
+
+    out = HERE / "full_chip.png"
+    fig.savefig(out, dpi=140, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     plot_tgate_hiz()
     plot_row_corners()
@@ -491,3 +576,4 @@ if __name__ == "__main__":
     plot_full_allon()
     plot_overlap_compare()
     plot_realistic()
+    plot_full_chip()
