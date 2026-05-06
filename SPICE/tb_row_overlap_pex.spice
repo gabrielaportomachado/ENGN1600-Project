@@ -1,0 +1,60 @@
+* tb_row_overlap_pex.spice -- post-PEX clone of tb_row_overlap.spice.
+* Identical to the schematic-level overlap TB except it includes the
+* parasitic-extracted row via row_pex_wrap.spice instead of row.spice.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+
+V_vdd vdd GND 3.3
+
+V_EN    EN_in    GND 0
+V_RSTn  RST_in   GND 0
+V_clk   CLK_in   GND 0
+V_MODE  MODE_in  GND 0
+V_MODEb MODEb_in GND 3.3
+
+V_E E_in GND 3.0
+
+R_IPG IPG GND 10k
+R_REC REC GND 10k
+C_IPG IPG GND 10f
+C_REC REC GND 10f
+
+Xrow IPG MODEb_in EN_in EN_cfgb CLK_in E_in MODE_in RST_in REC row
+
+.control
+save all
+
+alter @V_RSTn[PWL] = [ 0 0  50n 0  50.001n 3.3  10u 3.3 ]
+alter @V_EN[PWL]   = [ 0 3.3  10u 3.3 ]
+alter @V_clk[PWL]  = [ 0 0  100n 0  100.001n 3.3  200n 3.3  200.001n 0  10u 0 ]
+
+alter @V_MODE[PWL]  = [ 0 0    1u 0    1.0001u 3.3   10u 3.3 ]
+alter @V_MODEb[PWL] = [ 0 3.3  1.0002u 3.3  1.0003u 0     10u 0   ]
+
+tran 10p 1.5u 0 10p
+
+let overlap_v   = (v(ipg) + v(rec) - abs(v(ipg) - v(rec))) / 2
+let overlap_max = vecmax(overlap_v)
+
+let ipg_max = vecmax(v(ipg))
+let rec_max = vecmax(v(rec))
+
+echo ""
+echo "=== Row overlap test, POST-PEX (MODE 0->1 with 200ps Q/Qb skew) ==="
+echo "max v(IPG) over sim         = $&ipg_max V"
+echo "max v(REC) over sim         = $&rec_max V"
+echo "max( min(v(IPG), v(REC)) )  = $&overlap_max V   <-- overlap indicator"
+echo ""
+
+if $&overlap_max > 0.3
+  echo "FAIL_ROW_OVERLAP_PEX: both TGs simultaneously conduct (max-min = $&overlap_max V > 0.3V)"
+else
+  echo "PASS_ROW_OVERLAP_PEX: no simultaneous conduction observed (max-min = $&overlap_max V)"
+end
+
+write tb_row_overlap_pex.raw
+
+.endc
+.end

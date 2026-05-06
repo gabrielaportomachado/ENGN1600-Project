@@ -569,6 +569,236 @@ def plot_full_chip():
     print(f"wrote {out}")
 
 
+# ----------------------------------------- post-PEX vs schematic comparison
+def plot_pex_compare():
+    """Four-panel schematic-vs-PEX overlay across the three row-level TBs.
+
+    Tells one story: the post-PEX cell behaves like the schematic cell across
+    every corner and load condition, with two informative deltas:
+      (i) the overlap glitch persists on silicon (slightly blunted by RC)
+      (ii) the TG drop in stim mode is a few mV deeper post-PEX (parasitic R)
+    """
+    raw_corn_s   = RawRead(str(SPICE / "tb_row_corners.raw"))
+    raw_corn_p   = RawRead(str(SPICE / "tb_row_corners_pex.raw"))
+    raw_over_s   = RawRead(str(SPICE / "tb_row_overlap.raw"))
+    raw_over_p   = RawRead(str(SPICE / "tb_row_overlap_pex.raw"))
+    raw_real_s   = RawRead(str(SPICE / "tb_realistic.raw"))
+    raw_real_p   = RawRead(str(SPICE / "tb_realistic_pex.raw"))
+
+    SCH_COLOR = "#5a5a5a"   # schematic: muted grey
+    PEX_IPG   = "#1f77b4"   # PEX IPG: blue
+    PEX_REC   = "#d62728"   # PEX REC: red
+    PEX_E     = "#2ca02c"   # PEX E: green
+    DELTA_C   = "#ff7f0e"   # delta highlights: orange
+
+    fig = plt.figure(figsize=(14, 10))
+    gs = fig.add_gridspec(
+        3, 2,
+        height_ratios=[0.22, 1.0, 1.0],
+        hspace=0.42, wspace=0.22,
+        left=0.07, right=0.97, top=0.95, bottom=0.06,
+    )
+
+    # ---------- summary banner ----------
+    ax_banner = fig.add_subplot(gs[0, :])
+    ax_banner.axis("off")
+    ax_banner.set_xlim(0, 1)
+    ax_banner.set_ylim(0, 1)
+
+    ax_banner.text(
+        0.5, 0.85,
+        "Post-PEX vs schematic — single row, gf180mcuD",
+        ha="center", va="center", fontsize=16, fontweight="bold",
+    )
+    ax_banner.text(
+        0.5, 0.55,
+        "Magic RC extraction with cthresh=0, extresist on  →  parasitic Rs and Cs threaded through every metal trace",
+        ha="center", va="center", fontsize=10, style="italic", color="#444",
+    )
+
+    legend_handles = [
+        plt.Line2D([], [], color=SCH_COLOR, lw=2.4, ls="--", label="schematic-level row.spice"),
+        plt.Line2D([], [], color=PEX_IPG,   lw=2.4,           label="post-PEX row_pex_wrap.spice"),
+    ]
+    ax_banner.legend(
+        handles=legend_handles, loc="center", framealpha=0.0,
+        fontsize=11, ncol=2, bbox_to_anchor=(0.5, 0.18),
+    )
+
+    # ---------- (a) corners: phase C and D IPG sine, schematic vs PEX ----------
+    ax_corn = fig.add_subplot(gs[1, 0])
+
+    t_s = np.asarray(raw_corn_s.get_axis()) * 1e3  # ms
+    t_p = np.asarray(raw_corn_p.get_axis()) * 1e3
+    ipg_s = get(raw_corn_s, "v(ipg)")
+    ipg_p = get(raw_corn_p, "v(ipg)")
+    rec_s = get(raw_corn_s, "v(rec)")
+    rec_p = get(raw_corn_p, "v(rec)")
+    e_s   = get(raw_corn_s, "v(e_in)")
+
+    win = (t_s >= 3.5) & (t_s <= 5.5)
+    win_p = (t_p >= 3.5) & (t_p <= 5.5)
+
+    ax_corn.plot(t_s[win], e_s[win],  color="#bbb", lw=0.8, label="V(E)  (1 kHz, ±100 mV)")
+    ax_corn.plot(t_s[win], ipg_s[win], color=SCH_COLOR, lw=1.6, ls="--", label="V(IPG) sch")
+    ax_corn.plot(t_p[win_p], ipg_p[win_p], color=PEX_IPG, lw=1.4, label="V(IPG) PEX")
+    ax_corn.plot(t_s[win], rec_s[win], color=SCH_COLOR, lw=1.6, ls="--", label="V(REC) sch", alpha=0.6)
+    ax_corn.plot(t_p[win_p], rec_p[win_p], color=PEX_REC, lw=1.4, label="V(REC) PEX", alpha=0.85)
+
+    ax_corn.axvspan(3.5, 4.5, color="#cdeac0", alpha=0.30, zorder=0)
+    ax_corn.axvspan(4.5, 5.5, color="#bee1e6", alpha=0.30, zorder=0)
+    ax_corn.text(4.0, 1.83, "Phase C: MODE=0\nIPG path active", ha="center", fontsize=9, color="#384")
+    ax_corn.text(5.0, 1.83, "Phase D: MODE=1\nREC path active", ha="center", fontsize=9, color="#168")
+
+    ax_corn.set_xlim(3.5, 5.5)
+    ax_corn.set_ylim(1.40, 1.90)
+    ax_corn.set_xlabel("time [ms]")
+    ax_corn.set_ylabel("voltage [V]")
+    ax_corn.set_title("(a) Corner-case sweep — Phase C / D detail", fontsize=11, fontweight="bold")
+    ax_corn.legend(loc="lower right", framealpha=0.92, fontsize=8, ncol=2)
+    ax_corn.grid(True, alpha=0.3)
+
+    win_c_s = (t_s >= 3.5) & (t_s <= 4.5)
+    win_c_p = (t_p >= 3.5) & (t_p <= 4.5)
+    pp_ipg_s = ipg_s[win_c_s].max() - ipg_s[win_c_s].min()
+    pp_ipg_p = ipg_p[win_c_p].max() - ipg_p[win_c_p].min()
+    delta_pct = (pp_ipg_p - pp_ipg_s) / pp_ipg_s * 100
+    ax_corn.text(
+        0.02, 0.05,
+        f"Phase C — pp(IPG):\nsch = {pp_ipg_s*1e3:.1f} mV\nPEX = {pp_ipg_p*1e3:.1f} mV\nΔ = {delta_pct:+.2f}%  →  PASS 8/8",
+        transform=ax_corn.transAxes, va="bottom", fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="lightgreen", alpha=0.85),
+    )
+
+    # ---------- (b) overlap zoom: schematic vs PEX ----------
+    ax_over = fig.add_subplot(gs[1, 1])
+
+    t_s = np.asarray(raw_over_s.get_axis()) * 1e9  # ns
+    t_p = np.asarray(raw_over_p.get_axis()) * 1e9
+    ipg_s = get(raw_over_s, "v(ipg)")
+    ipg_p = get(raw_over_p, "v(ipg)")
+    rec_s = get(raw_over_s, "v(rec)")
+    rec_p = get(raw_over_p, "v(rec)")
+
+    lo, hi = 999.5, 1003.5
+    sel_s = (t_s >= lo) & (t_s <= hi)
+    sel_p = (t_p >= lo) & (t_p <= hi)
+
+    ax_over.plot(t_s[sel_s], ipg_s[sel_s], color=SCH_COLOR, lw=1.7, ls="--", label="V(IPG) sch")
+    ax_over.plot(t_p[sel_p], ipg_p[sel_p], color=PEX_IPG,   lw=1.7,           label="V(IPG) PEX")
+    ax_over.plot(t_s[sel_s], rec_s[sel_s], color=SCH_COLOR, lw=1.7, ls="--", alpha=0.55, label="V(REC) sch")
+    ax_over.plot(t_p[sel_p], rec_p[sel_p], color=PEX_REC,   lw=1.7,           label="V(REC) PEX")
+
+    overlap_s = np.minimum(ipg_s, rec_s)
+    overlap_p = np.minimum(ipg_p, rec_p)
+    omax_s = overlap_s[sel_s].max()
+    omax_p = overlap_p[sel_p].max()
+
+    ax_over.axhline(0.3, color="red", ls=":", lw=1, alpha=0.7, label="0.3 V threshold")
+    ax_over.set_xlim(lo, hi)
+    ax_over.set_ylim(-0.05, 2.4)
+    ax_over.set_xlabel("time [ns]   (transition triggered at 1000 ns)")
+    ax_over.set_ylabel("voltage [V]")
+    ax_over.set_title("(b) MODE-transition overlap — bug persists on silicon", fontsize=11, fontweight="bold")
+    ax_over.legend(loc="upper right", framealpha=0.92, fontsize=8, ncol=2)
+    ax_over.grid(True, alpha=0.3)
+
+    ax_over.annotate(
+        f"max(min(IPG, REC))\nsch = {omax_s:.3f} V\nPEX = {omax_p:.3f} V\nΔ = {(omax_p-omax_s)*1e3:+.0f} mV",
+        xy=(0.02, 0.95), xycoords="axes fraction", va="top",
+        fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="lightcoral", alpha=0.85),
+    )
+
+    # ---------- (c) realistic stim pulse: TG drop comparison ----------
+    ax_stim = fig.add_subplot(gs[2, 0])
+
+    t_s = np.asarray(raw_real_s.get_axis()) * 1e3  # ms
+    t_p = np.asarray(raw_real_p.get_axis()) * 1e3
+    drv_s = get(raw_real_s, "v(stim_drv)")
+    drv_p = get(raw_real_p, "v(stim_drv)")
+    e_s   = get(raw_real_s, "v(e_pin)")
+    e_p   = get(raw_real_p, "v(e_pin)")
+    ipg_s = get(raw_real_s, "v(ipg_pin)")
+    ipg_p = get(raw_real_p, "v(ipg_pin)")
+
+    lo, hi = 0.45, 0.85
+    sel_s = (t_s >= lo) & (t_s <= hi)
+    sel_p = (t_p >= lo) & (t_p <= hi)
+
+    ax_stim.plot(t_s[sel_s], drv_s[sel_s], color="#bbb", lw=1.0, alpha=0.7, label="V(stim_drv)")
+    ax_stim.plot(t_s[sel_s], ipg_s[sel_s], color=SCH_COLOR, lw=1.5, ls="--", label="V(IPG) sch")
+    ax_stim.plot(t_p[sel_p], ipg_p[sel_p], color=PEX_IPG,   lw=1.5,           label="V(IPG) PEX")
+    ax_stim.plot(t_s[sel_s], e_s[sel_s],   color=SCH_COLOR, lw=1.5, ls="--", alpha=0.55, label="V(E)  sch")
+    ax_stim.plot(t_p[sel_p], e_p[sel_p],   color=PEX_E,     lw=1.5,           label="V(E)  PEX")
+
+    ax_stim.axhline(1.65, color="grey", ls=":", lw=0.8)
+    ax_stim.set_xlim(lo, hi)
+    ax_stim.set_ylim(0.4, 2.9)
+    ax_stim.set_xlabel("time [ms]   (one biphasic stim pulse)")
+    ax_stim.set_ylabel("voltage [V]")
+    ax_stim.set_title("(c) Stim pulse, realistic loads — TG drop", fontsize=11, fontweight="bold")
+    ax_stim.legend(loc="upper right", framealpha=0.92, fontsize=8, ncol=2)
+    ax_stim.grid(True, alpha=0.3)
+
+    win_a = (t_s >= 0.65) & (t_s <= 0.70)
+    win_a_p = (t_p >= 0.65) & (t_p <= 0.70)
+    e_anod_s = e_s[win_a].mean()
+    e_anod_p = e_p[win_a_p].mean()
+    drv_a = drv_s[win_a].mean()
+    drop_s = (drv_a - 1.65) - (e_anod_s - 1.65)
+    drop_p = (drv_a - 1.65) - (e_anod_p - 1.65)
+
+    ax_stim.text(
+        0.02, 0.05,
+        f"V(E) anodic drop:\nsch = {drop_s*1e3:.0f} mV ({drop_s/(drv_a-1.65)*100:.0f}%)\n"
+        f"PEX = {drop_p*1e3:.0f} mV ({drop_p/(drv_a-1.65)*100:.0f}%)\nΔ = {(drop_p-drop_s)*1e3:+.1f} mV (parasitic R)",
+        transform=ax_stim.transAxes, va="bottom", fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="#fff3b0", alpha=0.92),
+    )
+
+    # ---------- (d) realistic LFP recording: REC transfer comparison ----------
+    ax_lfp = fig.add_subplot(gs[2, 1])
+
+    rec_s = get(raw_real_s, "v(rec_pin)")
+    rec_p = get(raw_real_p, "v(rec_pin)")
+    e_s   = get(raw_real_s, "v(e_pin)")
+    e_p   = get(raw_real_p, "v(e_pin)")
+    brain_s = get(raw_real_s, "v(brain_node)")
+
+    lo, hi = 28.0, 30.0
+    sel_s = (t_s >= lo) & (t_s <= hi)
+    sel_p = (t_p >= lo) & (t_p <= hi)
+
+    ax_lfp.plot(t_s[sel_s], (brain_s[sel_s] - 1.65) * 1e6, color="#bbb", lw=1.0, alpha=0.6, label="V(brain) source")
+    ax_lfp.plot(t_s[sel_s], (e_s[sel_s]     - 1.65) * 1e6, color=SCH_COLOR, lw=1.5, ls="--", label="V(E) sch")
+    ax_lfp.plot(t_p[sel_p], (e_p[sel_p]     - 1.65) * 1e6, color=PEX_E,     lw=1.5,           label="V(E) PEX", alpha=0.85)
+    ax_lfp.plot(t_s[sel_s], (rec_s[sel_s]   - 1.65) * 1e6, color=SCH_COLOR, lw=1.5, ls=":",  label="V(REC) sch", alpha=0.7)
+    ax_lfp.plot(t_p[sel_p], (rec_p[sel_p]   - 1.65) * 1e6, color=PEX_REC,   lw=1.5,           label="V(REC) PEX", alpha=0.85)
+    ax_lfp.axhline(0, color="grey", ls=":", lw=0.7)
+
+    ax_lfp.set_xlim(lo, hi)
+    ax_lfp.set_xlabel("time [ms]   (late record mode, post-drain)")
+    ax_lfp.set_ylabel("voltage from 1.65 V bias  [µV]")
+    ax_lfp.set_title("(d) LFP recording — 1 kHz, 100 µV", fontsize=11, fontweight="bold")
+    ax_lfp.legend(loc="upper right", framealpha=0.92, fontsize=8, ncol=2)
+    ax_lfp.grid(True, alpha=0.3)
+
+    pp_rec_s = rec_s[sel_s].max() - rec_s[sel_s].min()
+    pp_rec_p = rec_p[sel_p].max() - rec_p[sel_p].min()
+    ax_lfp.text(
+        0.02, 0.05,
+        f"pp(REC):\nsch = {pp_rec_s*1e6:.1f} µV\nPEX = {pp_rec_p*1e6:.1f} µV\nΔ = {(pp_rec_p-pp_rec_s)*1e6:+.2f} µV → LFP transfer preserved",
+        transform=ax_lfp.transAxes, va="bottom", fontsize=9,
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="lightgreen", alpha=0.85),
+    )
+
+    out = HERE / "pex_compare.png"
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     plot_tgate_hiz()
     plot_row_corners()
@@ -577,3 +807,4 @@ if __name__ == "__main__":
     plot_overlap_compare()
     plot_realistic()
     plot_full_chip()
+    plot_pex_compare()

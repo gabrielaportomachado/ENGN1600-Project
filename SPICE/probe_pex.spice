@@ -1,0 +1,50 @@
+* Transient probe of the post-PEX cell to find which signal stage is broken.
+* MODE=0, EN=1, RSTn released, single clock pulse to latch EN_cfg=1.
+* Expected at t=900 ns:  EN_cfg=3.3, SW_IPG=3.3, SW_IPGb=0, SW_REC=0, SW_RECb=3.3
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+
+V_vdd vdd GND 3.3
+V_RSTn RSTn GND PWL(0 0   100n 0   100.001n 3.3   2u 3.3)
+V_clk  clk  GND PWL(0 0   300n 0   300.001n 3.3   400n 3.3   400.001n 0   2u 0)
+V_EN   EN   GND PWL(0 0   150n 0   150.001n 3.3   2u 3.3)
+V_MODE MODE GND DC 0
+V_MODEb MODEb GND DC 3.3
+V_E    E    GND DC 1.0
+V_bias bias GND 1.65
+R_IPG IPG bias 100k
+R_REC REC bias 100k
+
+Xrow IPG MODEb EN EN_cfgb clk E MODE RSTn REC row
+
+.control
+save all
+tran 1n 1u
+
+meas tran v_IPG       find v(IPG)                 at=900n
+meas tran v_REC       find v(REC)                 at=900n
+meas tran v_EN_CFG    find v(xrow.EN_CFG_local)   at=900n
+meas tran v_SW_IPG    find v(xrow.SW_IPG_local)   at=900n
+meas tran v_SW_IPGb   find v(xrow.SW_IPGb_local)  at=900n
+meas tran v_SW_REC    find v(xrow.SW_REC_local)   at=900n
+meas tran v_SW_RECb   find v(xrow.SW_RECb_local)  at=900n
+meas tran v_EN_cfgb   find v(EN_cfgb)             at=900n
+
+echo ""
+echo "=== signal chain at t=900ns (post-clock-latch, MODE=0, EN=1) ==="
+echo "Stage 1 -- DFF latch:"
+echo "  EN_cfg  = $&v_EN_CFG    (expect 3.3 V)"
+echo "  EN_cfgb = $&v_EN_cfgb   (expect 0   V)"
+echo "Stage 2 -- AND gates:"
+echo "  SW_IPG  = $&v_SW_IPG    (expect 3.3 V, EN_cfg AND MODEb)"
+echo "  SW_REC  = $&v_SW_REC    (expect 0   V, EN_cfg AND MODE)"
+echo "Stage 3 -- INV outputs:"
+echo "  SW_IPGb = $&v_SW_IPGb   (expect 0   V)"
+echo "  SW_RECb = $&v_SW_RECb   (expect 3.3 V)"
+echo "Stage 4 -- TG outputs:"
+echo "  IPG     = $&v_IPG       (expect ~1   V, follows E)"
+echo "  REC     = $&v_REC       (expect ~1.65 V, isolated to bias)"
+
+.endc
+.end

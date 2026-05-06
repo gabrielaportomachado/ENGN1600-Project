@@ -1,0 +1,45 @@
+* row_pex_wrap.spice -- drop-in replacement for row.spice using the post-PEX layout.
+*
+* The Magic-extracted SPICE/row_pex.spice defines a `.subckt ROW` whose port list
+* differs from the schematic-level `row.spice`'s `.subckt row`:
+*
+*   ROW (post-PEX, 16 ports after we appended the 5 schematic-only inputs):
+*     EN_CFG VDD GND EN_CFGb SW_RECb SW_REC E REC IPG SW_IPG SW_IPGb
+*     MODE MODEb EN CLK RSTn
+*
+*   row (schematic, 9 ports):
+*     IPG MODEb EN EN_cfgb clk E MODE RSTn REC
+*
+* This file defines `.subckt row` with the 9 schematic ports, and internally
+* instantiates the 16-port `ROW` cell from the PEX, mapping the 9 schematic
+* ports onto the corresponding ROW ports and leaving the 6 layout-only nets
+* (VDD, GND, EN_CFG, SW_REC, SW_RECb, SW_IPG, SW_IPGb) as internal/global.
+*
+* Use in any existing testbench by replacing
+*     .include /foss/designs/ENGN1600-Project/SPICE/row.spice
+* with
+*     .include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+* The Xrow ... row instance line stays the same.
+
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex.spice
+
+* Make vdd a global net so that the PEX cell's VDD port (mapped below)
+* connects to the testbench's V_vdd source — without this, the wrapper's
+* local `vdd` floats around ~1.1 V and the entire cell is unpowered.
+.global vdd
+
+.subckt row IPG MODEb EN EN_cfgb clk E MODE RSTn REC
+*.PININFO IPG:O MODEb:I EN:I EN_cfgb:O clk:I E:I MODE:I RSTn:I REC:O
+
+* Map row's 9 schematic ports onto ROW's 16 ports.
+* ROW pin order: EN_CFG VDD GND EN_CFGb SW_RECb SW_REC E REC IPG SW_IPG SW_IPGb MODE MODEb EN CLK RSTn
+* Internal-only nets (EN_CFG, SW_*, GND/VDD globals) get distinct local names
+* so they're not conflated across multiple row instances.
+Xpex
++ EN_CFG_local         vdd                  GND
++ EN_cfgb              SW_RECb_local        SW_REC_local
++ E                    REC                  IPG
++ SW_IPG_local         SW_IPGb_local        MODE
++ MODEb                EN                   clk
++ RSTn                 ROW_pex_cell
+.ends row

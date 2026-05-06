@@ -1,0 +1,116 @@
+* tb_realistic_pex.spice -- post-PEX clone of tb_realistic.spice.
+* Same realistic-load setup; swaps the schematic-level row.spice for the
+* parasitic-extracted row via row_pex_wrap.spice.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+
+V_vdd vdd GND 3.3
+
+V_RSTn RSTn_in GND PWL(0 0  100n 0  100.001n 3.3  30m 3.3)
+V_clk  CLK_in  GND PWL(0 0  200n 0  200.001n 3.3  300n 3.3  300.001n 0  10m 0)
+V_EN   EN_in   GND PWL(0 0  150n 0  150.001n 3.3  30m 3.3)
+
+V_MODE  MODE_in  GND PWL(0 0    15m 0    15.0001m 3.3   30m 3.3)
+V_MODEb MODEb_in GND PWL(0 3.3  15m 3.3  15.0001m 0     30m 0)
+
+V_brain brain_node GND SIN(1.65 100u 1k)
+R_s    brain_node tissue_node 1k
+C_dl   tissue_node E_pin 300n
+R_ct   tissue_node E_pin 50k
+
+V_stim stim_drv GND PWL(
++ 0          1.65
++ 500u       1.65
++ 500.001u   0.65
++ 600u       0.65
++ 600.001u   2.65
++ 700u       2.65
++ 700.001u   1.65
++ 1500u      1.65
++ 1500.001u  0.65
++ 1600u      0.65
++ 1600.001u  2.65
++ 1700u      2.65
++ 1700.001u  1.65
++ 2500u      1.65
++ 2500.001u  0.65
++ 2600u      0.65
++ 2600.001u  2.65
++ 2700u      2.65
++ 2700.001u  1.65
++ 3500u      1.65
++ 3500.001u  0.65
++ 3600u      0.65
++ 3600.001u  2.65
++ 3700u      2.65
++ 3700.001u  1.65
++ 4500u      1.65
++ 4500.001u  0.65
++ 4600u      0.65
++ 4600.001u  2.65
++ 4700u      2.65
++ 4700.001u  1.65
++ 10m        1.65 )
+R_drv stim_drv IPG_pin 100
+C_pad_IPG IPG_pin GND 2p
+
+V_bias_amp bias_amp GND 1.65
+R_amp REC_pin bias_amp 1G
+C_pad_REC REC_pin GND 2p
+
+Xrow IPG_pin MODEb_in EN_in EN_cfgb CLK_in E_pin MODE_in RSTn_in REC_pin row
+
+.control
+save all
+
+tran 1u 30m 0 5u
+
+meas tran v_stim_cath  avg v(stim_drv) from=550u to=600u
+meas tran v_ipg_cath   avg v(IPG_pin)  from=550u to=600u
+meas tran v_e_cath     avg v(E_pin)    from=550u to=600u
+
+meas tran v_stim_anod  avg v(stim_drv) from=650u to=700u
+meas tran v_ipg_anod   avg v(IPG_pin)  from=650u to=700u
+meas tran v_e_anod     avg v(E_pin)    from=650u to=700u
+
+meas tran v_rec_during_stim_max max v(REC_pin) from=400u to=14m
+meas tran v_rec_during_stim_min min v(REC_pin) from=400u to=14m
+
+meas tran v_rec_rec_max max v(REC_pin) from=28m to=30m
+meas tran v_rec_rec_min min v(REC_pin) from=28m to=30m
+meas tran v_e_rec_max  max v(E_pin)    from=28m to=30m
+meas tran v_e_rec_min  min v(E_pin)    from=28m to=30m
+
+meas tran v_ipg_during_rec_max max v(IPG_pin) from=28m to=30m
+meas tran v_ipg_during_rec_min min v(IPG_pin) from=28m to=30m
+
+meas tran v_e_initial find v(E_pin) at=15.001m
+meas tran v_e_settled find v(E_pin) at=29m
+
+let stim_pp_drv  = v_stim_anod - v_stim_cath
+let stim_pp_ipg  = v_ipg_anod  - v_ipg_cath
+let stim_pp_e    = v_e_anod    - v_e_cath
+let rec_pp_amp   = v_rec_rec_max - v_rec_rec_min
+let rec_pp_e     = v_e_rec_max   - v_e_rec_min
+let xtalk_rec_during_stim = v_rec_during_stim_max - v_rec_during_stim_min
+let xtalk_ipg_during_rec  = v_ipg_during_rec_max  - v_ipg_during_rec_min
+
+echo ""
+echo "===== Realistic-load testbench, single row, POST-PEX ====="
+echo ""
+echo "STIM mode (MODE=0):"
+echo "  pp(stim_drv)  = $&stim_pp_drv V    (driver intent)"
+echo "  pp(IPG_pin)   = $&stim_pp_ipg V    (after R_drv loss)"
+echo "  pp(E_pin)     = $&stim_pp_e V    (after TG + electrode divider)"
+echo "  pp(REC_pin) crosstalk = $&xtalk_rec_during_stim V"
+echo ""
+echo "RECORD mode (MODE=1, measured t=28-30ms):"
+echo "  pp(E_pin)     = $&rec_pp_e V    (LFP source at brain)"
+echo "  pp(REC_pin)   = $&rec_pp_amp V    (LFP at amp input -- expect ~100 uV)"
+echo "  pp(IPG_pin) crosstalk = $&xtalk_ipg_during_rec V"
+
+write tb_realistic_pex.raw
+.endc
+.end

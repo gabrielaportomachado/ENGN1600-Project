@@ -1,0 +1,136 @@
+* tb_row_corners_pex.spice -- post-PEX clone of tb_row_corners.spice
+* Same corner-case sweep against the parasitic-extracted row.
+*
+* Drives the row through 4 sequential phases; for each, measures peak-to-peak
+* swing on IPG and REC vs. the sine signal injected on E.  PASS criteria:
+*   isolated path  -> pp < 0.02 V
+*   conducting path -> pp > 0.15 V (with E pp = 0.2 V)
+* Convention follows project TBs: GND is the reference (ngspice aliases GND<->0).
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+
+* --- supplies (vdd and VDD collapse to one node in ngspice; one source suffices) ---
+V_vdd vdd GND 3.3
+
+* --- DUT digital inputs (PWL/PULSE assigned in .control) ---
+V_EN    EN_in    GND 0
+V_RSTn  RST_in   GND 0
+V_clk   CLK_in   GND 0
+V_MODE  MODE_in  GND 0
+V_MODEb MODEb_in GND 3.3
+
+* --- E: sine, 1kHz, +/-0.1V around mid-rail (matches row_tb.sch convention) ---
+V_E     E_in     GND SIN(1.65 0.1 1k)
+
+* --- bias floating outputs to mid-rail through 100k; 10fF cap mimics row_tb.sch ---
+V_bias bias GND 1.65
+R_IPG  IPG  bias 100k
+R_REC  REC  bias 100k
+C_IPG  IPG  GND 10f
+C_REC  REC  GND 10f
+
+* --- DUT (pin order: IPG MODEb EN EN_cfgb clk E MODE RSTn REC) ---
+Xrow IPG MODEb_in EN_in EN_cfgb CLK_in E_in MODE_in RST_in REC row
+
+.control
+save all
+
+* CLK: free-running 1 MHz throughout (1us period, 0.5us high)
+alter @V_clk[PULSE] = [ 0 3.3 0 1n 1n 0.5u 1u ]
+
+* RSTn: 0 for 0..1.5ms, 1 thereafter
+alter @V_RSTn[PWL] = [ 0 0    1.5m 0    1.5001m 3.3   6m 3.3 ]
+
+* EN: 1 for 0..1.5ms (Phase A: tries to assert during reset),
+*     0 for 1.5..3ms  (Phase B: confirms EN=0 doesnt enable),
+*     1 for 3..6ms    (Phase C/D: enables channel)
+alter @V_EN[PWL] = [ 0 3.3  1.5m 3.3  1.5001m 0  3m 0  3.0001m 3.3  6m 3.3 ]
+
+* MODE: 0 for 0..4.5ms (Phase A/B/C), 1 for 4.5..6ms (Phase D)
+alter @V_MODE[PWL]  = [ 0 0    4.5m 0    4.5001m 3.3   6m 3.3 ]
+alter @V_MODEb[PWL] = [ 0 3.3  4.5m 3.3  4.5001m 0     6m 0   ]
+
+tran 0.5u 6m
+
+* --- pp swing per phase, sampled in 1ms windows safely after each transition ---
+meas tran ipg_max_A max v(IPG) from=0.5m to=1.4m
+meas tran ipg_min_A min v(IPG) from=0.5m to=1.4m
+meas tran rec_max_A max v(REC) from=0.5m to=1.4m
+meas tran rec_min_A min v(REC) from=0.5m to=1.4m
+
+meas tran ipg_max_B max v(IPG) from=2.0m to=2.9m
+meas tran ipg_min_B min v(IPG) from=2.0m to=2.9m
+meas tran rec_max_B max v(REC) from=2.0m to=2.9m
+meas tran rec_min_B min v(REC) from=2.0m to=2.9m
+
+meas tran ipg_max_C max v(IPG) from=3.5m to=4.4m
+meas tran ipg_min_C min v(IPG) from=3.5m to=4.4m
+meas tran rec_max_C max v(REC) from=3.5m to=4.4m
+meas tran rec_min_C min v(REC) from=3.5m to=4.4m
+
+meas tran ipg_max_D max v(IPG) from=5.0m to=5.9m
+meas tran ipg_min_D min v(IPG) from=5.0m to=5.9m
+meas tran rec_max_D max v(REC) from=5.0m to=5.9m
+meas tran rec_min_D min v(REC) from=5.0m to=5.9m
+
+let pp_ipg_A = ipg_max_A - ipg_min_A
+let pp_rec_A = rec_max_A - rec_min_A
+let pp_ipg_B = ipg_max_B - ipg_min_B
+let pp_rec_B = rec_max_B - rec_min_B
+let pp_ipg_C = ipg_max_C - ipg_min_C
+let pp_rec_C = rec_max_C - rec_min_C
+let pp_ipg_D = ipg_max_D - ipg_min_D
+let pp_rec_D = rec_max_D - rec_min_D
+
+echo ""
+echo "=== Row corner-case results (E pp swing = 0.2 V) ==="
+echo "Phase A (RSTn=0, EN driven hi): pp(IPG)=$&pp_ipg_A pp(REC)=$&pp_rec_A  -- both should be ~0"
+echo "Phase B (RSTn=1, EN=0)        : pp(IPG)=$&pp_ipg_B pp(REC)=$&pp_rec_B  -- both should be ~0"
+echo "Phase C (EN=1, MODE=0)        : pp(IPG)=$&pp_ipg_C pp(REC)=$&pp_rec_C  -- IPG ~0.2V, REC ~0"
+echo "Phase D (EN=1, MODE=1)        : pp(IPG)=$&pp_ipg_D pp(REC)=$&pp_rec_D  -- IPG ~0, REC ~0.2V"
+echo ""
+
+let fails = 0
+if $&pp_ipg_A > 0.02
+  echo "FAIL Phase A: IPG not isolated under reset"
+  let fails = fails + 1
+end
+if $&pp_rec_A > 0.02
+  echo "FAIL Phase A: REC not isolated under reset"
+  let fails = fails + 1
+end
+if $&pp_ipg_B > 0.02
+  echo "FAIL Phase B: IPG not isolated with EN=0"
+  let fails = fails + 1
+end
+if $&pp_rec_B > 0.02
+  echo "FAIL Phase B: REC not isolated with EN=0"
+  let fails = fails + 1
+end
+if $&pp_ipg_C < 0.15
+  echo "FAIL Phase C: IPG path not conducting (MODE=0)"
+  let fails = fails + 1
+end
+if $&pp_rec_C > 0.02
+  echo "FAIL Phase C: REC not isolated (MODE=0)"
+  let fails = fails + 1
+end
+if $&pp_ipg_D > 0.02
+  echo "FAIL Phase D: IPG not isolated (MODE=1)"
+  let fails = fails + 1
+end
+if $&pp_rec_D < 0.15
+  echo "FAIL Phase D: REC path not conducting (MODE=1)"
+  let fails = fails + 1
+end
+if $&fails = 0
+  echo "PASS_ROW_CORNERS all 8 checks passed"
+else
+  echo "FAIL_ROW_CORNERS $&fails check(s) failed"
+end
+
+write tb_row_corners_pex.raw
+.endc
+.end
