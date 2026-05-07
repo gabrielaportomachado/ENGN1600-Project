@@ -97,13 +97,13 @@ C {lab_wire.sym} 80 290 0 0 {name=p_tissue_at_Cdl sig_type=std_logic lab=tissue_
 C {lab_wire.sym} 80 410 0 0 {name=p_E_at_Cdl sig_type=std_logic lab=E_pin}
 C {lab_wire.sym} 160 290 0 0 {name=p_tissue_at_Rct sig_type=std_logic lab=tissue_node}
 C {lab_wire.sym} 160 410 0 0 {name=p_E_at_Rct sig_type=std_logic lab=E_pin}
-C {devices/code_shown.sym} 50 280 0 0 {name=MODELS only_toplevel=true
+C {devices/code_shown.sym} -30 540 0 0 {name=MODELS only_toplevel=true
 format="tcleval( @value )"
 value="
 .include $::180MCU_MODELS/design.ngspice
 .lib $::180MCU_MODELS/sm141064.ngspice typical
 "}
-C {code_shown.sym} 700 -300 0 0 {name=s1 only_toplevel=false value="
+C {code_shown.sym} 760 -260 0 0 {name=s1 only_toplevel=false value="
 .control
 save all
 
@@ -121,7 +121,7 @@ alter @V_MODE[PWL]  = [ 0 0    15m 0    15.0001m 3.3   30m 3.3 ]
 alter @V_MODEb[PWL] = [ 0 3.3  15m 3.3  15.0001m 0     30m 0 ]
 
 ** Brain LFP: 100uV sine at 1kHz on 1.65V mid-rail
-alter @V_brain[SIN] = [ 1.65 100u 1k 0 0 0 ]
+alter @V_brain[SIN] = [ 1.65 10m 1k 0 0 0 ]
 
 ** Stim driver: biphasic pulses at 0.5/1.5/2.5/3.5/4.5 ms during stim phase,
 ** then held at mid-rail for 10 ms drain before MODE switches.
@@ -160,6 +160,10 @@ alter @V_stim[PWL] = [
 + 30m        1.65 ]
 
 tran 1u 30m 0 5u
+
+** plots
+set color0 = white
+plot (v(MODE)/6.6)+1.4 v(REC_pin) v(E_pin) v(IPG_pin)/3 + (1.65-1.65/3)
 
 write tb_realistic.raw
 .endc
