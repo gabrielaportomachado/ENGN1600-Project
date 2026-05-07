@@ -1,52 +1,89 @@
-* row_fixed.spice
-*
-* Drop-in replacement for the row subcircuit that adds cross-coupled
-* break-before-make logic to the per-channel switch driver, eliminating the
-* MODE-transition overlap glitch that tb_row_overlap.spice catches.
-*
-* Naming: this subckt is called `row_fixed` (NOT `row`) so it can coexist
-* with the original row.spice in the same simulation.  Helper cells
-* (AND, DFF, INV, TGATE) are NOT redefined here -- they're expected to come
-* from row.spice (or the individual cell .spice files) included by the TB.
-*
-* Same port list as the original `row`, so a TB can swap one for the other
-* by changing only the X-instance line:
-*     Xrow IPG MODEb EN EN_cfgb clk E MODE RSTn REC row         <- original
-*     Xrow IPG MODEb EN EN_cfgb clk E MODE RSTn REC row_fixed   <- fixed
-*
-* Logic change vs row.spice:
-*     OLD:  SW_IPG = EN_cfg AND MODEb
-*           SW_REC = EN_cfg AND MODE
-*     NEW:  SW_IPG_pre = EN_cfg AND MODEb           (existing AND, renamed)
-*           SW_REC_pre = EN_cfg AND MODE            (existing AND, renamed)
-*           SW_IPG     = SW_IPG_pre AND SW_RECb     (NEW AND, x1b)
-*           SW_REC     = SW_REC_pre AND SW_IPGb     (NEW AND, x4b)
-*     The two existing INVs (x5/x7) keep producing SW_IPGb/SW_RECb from
-*     the FINAL SW signals, closing the cross-coupled feedback loop.
-*
-* Cost: +2 AND2 cells per row (32 chip-wide).  No port change, no new cell type.
-
-.subckt row_fixed IPG MODEb EN EN_cfgb clk E MODE RSTn REC
+** sch_path: /foss/designs/project/row_fixed.sch
+.subckt row IPG MODEb EN EN_cfgb clk E MODE RSTn REC
 *.PININFO EN:I clk:I MODEb:I MODE:I E:I IPG:O REC:O RSTn:I EN_cfgb:O
-
-* per-channel enable register (unchanged from row.spice)
-x2  vdd RSTn EN EN_cfg EN_cfgb clk GND DFF
-
-* first-stage ANDs -- intent (would-be SW_IPG/SW_REC if no skew protection)
-x1  EN_cfg     SW_IPG_pre MODEb    AND
-x4  EN_cfg     SW_REC_pre MODE     AND
-
-* second-stage ANDs -- enforce mutual exclusion via cross-coupled SWb feedback
-* SW_IPG can only be HIGH if SW_REC is currently LOW (so SW_RECb=HIGH), and vice versa.
-x1b SW_IPG_pre SW_IPG     SW_RECb  AND
-x4b SW_REC_pre SW_REC     SW_IPGb  AND
-
-* SWb generation (unchanged from row.spice -- now drives the cross-coupled feedback)
-x5  SW_IPGb SW_IPG INV
-x7  SW_RECb SW_REC INV
-
-* analog switches (unchanged from row.spice)
-x3  IPG SW_IPG SW_IPGb E TGATE
-x6  REC SW_REC SW_RECb E TGATE
-
+x1 EN_cfg SW_IPG_pre MODEb AND
+x2 vdd RSTn EN EN_cfg EN_cfgb clk GND DFF
+x3 IPG SW_IPG SW_IPGb E TGATE
+x4 EN_cfg SW_REC_pre MODE AND
+x6 REC SW_REC SW_RECb E TGATE
+x5 SW_IPGb SW_IPG INV
+x7 SW_RECb SW_REC INV
+x1b SW_RECb SW_IPG SW_IPG_pre AND
+x4b SW_IPGb SW_REC SW_REC_pre AND
 .ends
+
+* expanding   symbol:  AND/AND.sym # of pins=3
+** sym_path: /foss/designs/project/AND/AND.sym
+** sch_path: /foss/designs/project/AND/AND.sch
+.subckt AND IN0 OUT IN1
+*.PININFO OUT:O IN0:I IN1:I
+M1 net1 IN0 net2 GND nfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 net2 IN1 GND GND nfet_03v3 L=0.28u W=1u nf=1 m=1
+M3 net1 IN0 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M4 net1 IN1 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+x1 OUT net1 INV
+.ends
+
+
+* expanding   symbol:  DFF/DFF.sym # of pins=7
+** sym_path: /foss/designs/project/DFF/DFF.sym
+** sch_path: /foss/designs/project/DFF/DFF.sch
+.subckt DFF vdd RSTn D Q Qb CLK vss
+*.PININFO D:I CLK:I RSTn:I Q:O vdd:B vss:B Qb:O
+M1 net1 D net3 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 net1 D net2 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M3 net2 c vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M4 net3 cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M5 cbar CLK vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M6 cbar CLK vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M7 c cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M8 c cbar vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M11 net5 RSTn net4 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M12 net4 net6 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M13 net5 RSTn vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M14 net5 net6 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M15 net6 net1 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M16 net6 net1 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M21 net9 net7 net8 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M22 net8 RSTn vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M23 net9 net7 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M24 net9 RSTn vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M25 Q net9 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M26 Q net9 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M19 net7 net9 net11 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M20 net7 net9 net10 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M31 net10 c vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M32 net11 cbar vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M35 net12 net9 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M36 net12 net9 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M37 Qb net12 vss vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M38 Qb net12 vdd vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M9 net1 c net5 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M10 net1 cbar net5 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+M17 net6 c net7 vss nfet_03v3 L=0.28u W=1u nf=1 m=1
+M18 net6 cbar net7 vdd pfet_03v3 L=0.28u W=1u nf=1 m=1
+.ends
+
+
+* expanding   symbol:  TGATE/TGATE.sym # of pins=4
+** sym_path: /foss/designs/project/TGATE/TGATE.sym
+** sch_path: /foss/designs/project/TGATE/TGATE.sch
+.subckt TGATE out c cbar in
+*.PININFO in:I out:O cbar:I c:I
+M1 out cbar in VDD pfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 out c in GND nfet_03v3 L=0.28u W=1u nf=1 m=1
+.ends
+
+
+* expanding   symbol:  AND/INV.sym # of pins=2
+** sym_path: /foss/designs/project/AND/INV.sym
+** sch_path: /foss/designs/project/AND/INV.sch
+.subckt INV OUT IN
+*.PININFO IN:I OUT:O
+M1 OUT IN VDD VDD pfet_03v3 L=0.28u W=1u nf=1 m=1
+M2 OUT IN GND GND nfet_03v3 L=0.28u W=0.5u nf=1 m=1
+.ends
+
+.GLOBAL GND
+.GLOBAL vdd
+.GLOBAL VDD

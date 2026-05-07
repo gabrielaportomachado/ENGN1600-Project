@@ -30,12 +30,10 @@ N -350 50 -350 80 {lab=RSTn}
 N -300 -5 -275 -5 {lab=EN_cfgb}
 N -275 -25 -225 -25 {lab=EN_cfg}
 N -430 85 -430 110 {lab=GND}
-N 100 -60 140 -60 {lab=SW_IPG_pre}
-N 140 -80 140 -60 {lab=SW_IPG_pre}
+N 100 -60 140 -60 {lab=SW_RECb}
+N 140 -60 140 -40 {lab=SW_RECb}
 N 100 60 140 60 {lab=SW_REC_pre}
-N 140 40 140 60 {lab=SW_REC_pre}
-N 140 -40 180 -40 {lab=SW_RECb}
-N 140 80 180 80 {lab=SW_IPGb}
+N 140 60 140 80 {lab=SW_REC_pre}
 C {AND/AND.sym} 40 -60 0 0 {name=x1}
 C {DFF/DFF.sym} -380 30 0 0 {name=x2}
 C {TGATE/TGATE.sym} 590 -90 0 0 {name=x3}
@@ -70,7 +68,7 @@ C {vdd.sym} -360 -105 0 0 {name=l2 lab=vdd}
 C {lab_wire.sym} -340 -100 2 0 {name=p2 sig_type=std_logic lab=GND}
 C {AND/AND.sym} 200 -60 0 0 {name=x1b}
 C {AND/AND.sym} 200 60 0 0 {name=x4b}
-C {lab_wire.sym} 170 -40 0 0 {name=p30 sig_type=std_logic lab=SW_RECb}
-C {lab_wire.sym} 170 80 0 0 {name=p31 sig_type=std_logic lab=SW_IPGb}
+C {lab_wire.sym} 140 -80 0 0 {name=p30 sig_type=std_logic lab=SW_RECb}
+C {lab_wire.sym} 140 40 0 0 {name=p31 sig_type=std_logic lab=SW_IPGb}
 C {lab_wire.sym} 130 -60 0 0 {name=p32 sig_type=std_logic lab=SW_IPG_pre}
 C {lab_wire.sym} 130 60 0 0 {name=p33 sig_type=std_logic lab=SW_REC_pre}
