@@ -31,7 +31,6 @@ N 405 55 475 55 {lab=REC}
 N 475 115 475 130 {lab=GND}
 N 520 15 520 30 {lab=GND}
 N 475 -45 520 -45 {lab=IPG}
-C {row.sym} 280 0 0 0 {name=x1}
 C {vsource.sym} -285 0 0 0 {name=V1 value=3.3 savecurrent=false}
 C {gnd.sym} -285 70 0 0 {name=l1 lab=GND}
 C {lab_wire.sym} -285 -70 3 0 {name=p1 sig_type=std_logic lab=vdd}
@@ -91,7 +90,7 @@ alter @v3[PULSE] = [ 0 3.3 0.3m 1n 1n 5.7m 6m ]
 alter @v4[PULSE] = [ 0 3.3 3m 1n 1n 3m 6m ]
 
 ** MODEb: complement of MODE
-alter @v5[PULSE] = [ 3.3 0 3m 1n 1n 3m 6m ]
+alter @v5[PULSE] = [ 3.3 3.3 3m 1n 1n 3m 6m ]
 
 ** RSTN: active-low reset, released after 0.2 ms
 alter @v6[PULSE] = [ 0 3.3 0.2m 1n 1n 5.8m 6m ]
@@ -130,3 +129,4 @@ value=10f
 footprint=1206
 device="ceramic capacitor"}
 C {gnd.sym} 520 30 0 0 {name=l10 lab=GND}
+C {row_fixed.sym} 280 0 0 0 {name=x1}
