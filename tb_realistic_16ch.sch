@@ -210,12 +210,6 @@ N 3160 230 3160 320 {lab=#net16}
 N 3080 380 3080 410 {lab=E15}
 N 3160 380 3160 410 {lab=E15}
 N 3080 410 3160 410 {lab=E15}
-N 1325 -225 1385 -225 {lab=EN0}
-N 1325 -185 1385 -185 {lab=E0}
-N 1455 -335 1455 -275 {lab=MODE}
-N 1485 -335 1485 -275 {lab=RSTn}
-N 1525 -335 1525 -275 {lab=clk}
-N 1555 -335 1555 -275 {lab=MODEb}
 N 1625 -245 1695 -245 {lab=IPG0}
 N 1695 -245 1740 -245 {lab=IPG0}
 N 1740 -245 1790 -245 {lab=IPG0}
@@ -226,12 +220,6 @@ N 1740 -185 1740 -170 {lab=stim_drv}
 N 1790 -185 1790 -170 {lab=GND}
 N 1740 -85 1740 -55 {lab=bias_amp}
 N 1790 -85 1790 -55 {lab=GND}
-N 2025 -225 2085 -225 {lab=EN1}
-N 2025 -185 2085 -185 {lab=E1}
-N 2155 -335 2155 -275 {lab=MODE}
-N 2185 -335 2185 -275 {lab=RSTn}
-N 2225 -335 2225 -275 {lab=clk}
-N 2255 -335 2255 -275 {lab=MODEb}
 N 2325 -245 2395 -245 {lab=IPG1}
 N 2395 -245 2440 -245 {lab=IPG1}
 N 2440 -245 2490 -245 {lab=IPG1}
@@ -242,12 +230,6 @@ N 2440 -185 2440 -170 {lab=stim_drv}
 N 2490 -185 2490 -170 {lab=GND}
 N 2440 -85 2440 -55 {lab=bias_amp}
 N 2490 -85 2490 -55 {lab=GND}
-N 2725 -225 2785 -225 {lab=EN2}
-N 2725 -185 2785 -185 {lab=E2}
-N 2855 -335 2855 -275 {lab=MODE}
-N 2885 -335 2885 -275 {lab=RSTn}
-N 2925 -335 2925 -275 {lab=clk}
-N 2955 -335 2955 -275 {lab=MODEb}
 N 3025 -245 3095 -245 {lab=IPG2}
 N 3095 -245 3140 -245 {lab=IPG2}
 N 3140 -245 3190 -245 {lab=IPG2}
@@ -258,12 +240,6 @@ N 3140 -185 3140 -170 {lab=stim_drv}
 N 3190 -185 3190 -170 {lab=GND}
 N 3140 -85 3140 -55 {lab=bias_amp}
 N 3190 -85 3190 -55 {lab=GND}
-N 3425 -225 3485 -225 {lab=EN3}
-N 3425 -185 3485 -185 {lab=E3}
-N 3555 -335 3555 -275 {lab=MODE}
-N 3585 -335 3585 -275 {lab=RSTn}
-N 3625 -335 3625 -275 {lab=clk}
-N 3655 -335 3655 -275 {lab=MODEb}
 N 3725 -245 3795 -245 {lab=IPG3}
 N 3795 -245 3840 -245 {lab=IPG3}
 N 3840 -245 3890 -245 {lab=IPG3}
@@ -274,12 +250,6 @@ N 3840 -185 3840 -170 {lab=stim_drv}
 N 3890 -185 3890 -170 {lab=GND}
 N 3840 -85 3840 -55 {lab=bias_amp}
 N 3890 -85 3890 -55 {lab=GND}
-N 1325 575 1385 575 {lab=EN4}
-N 1325 615 1385 615 {lab=E4}
-N 1455 465 1455 525 {lab=MODE}
-N 1485 465 1485 525 {lab=RSTn}
-N 1525 465 1525 525 {lab=clk}
-N 1555 465 1555 525 {lab=MODEb}
 N 1625 555 1695 555 {lab=IPG4}
 N 1695 555 1740 555 {lab=IPG4}
 N 1740 555 1790 555 {lab=IPG4}
@@ -290,12 +260,6 @@ N 1740 615 1740 630 {lab=stim_drv}
 N 1790 615 1790 630 {lab=GND}
 N 1740 715 1740 745 {lab=bias_amp}
 N 1790 715 1790 745 {lab=GND}
-N 2025 575 2085 575 {lab=EN5}
-N 2025 615 2085 615 {lab=E5}
-N 2155 465 2155 525 {lab=MODE}
-N 2185 465 2185 525 {lab=RSTn}
-N 2225 465 2225 525 {lab=clk}
-N 2255 465 2255 525 {lab=MODEb}
 N 2325 555 2395 555 {lab=IPG5}
 N 2395 555 2440 555 {lab=IPG5}
 N 2440 555 2490 555 {lab=IPG5}
@@ -306,12 +270,6 @@ N 2440 615 2440 630 {lab=stim_drv}
 N 2490 615 2490 630 {lab=GND}
 N 2440 715 2440 745 {lab=bias_amp}
 N 2490 715 2490 745 {lab=GND}
-N 2725 575 2785 575 {lab=EN6}
-N 2725 615 2785 615 {lab=E6}
-N 2855 465 2855 525 {lab=MODE}
-N 2885 465 2885 525 {lab=RSTn}
-N 2925 465 2925 525 {lab=clk}
-N 2955 465 2955 525 {lab=MODEb}
 N 3025 555 3095 555 {lab=IPG6}
 N 3095 555 3140 555 {lab=IPG6}
 N 3140 555 3190 555 {lab=IPG6}
@@ -322,12 +280,6 @@ N 3140 615 3140 630 {lab=stim_drv}
 N 3190 615 3190 630 {lab=GND}
 N 3140 715 3140 745 {lab=bias_amp}
 N 3190 715 3190 745 {lab=GND}
-N 3425 575 3485 575 {lab=EN7}
-N 3425 615 3485 615 {lab=E7}
-N 3555 465 3555 525 {lab=MODE}
-N 3585 465 3585 525 {lab=RSTn}
-N 3625 465 3625 525 {lab=clk}
-N 3655 465 3655 525 {lab=MODEb}
 N 3725 555 3795 555 {lab=IPG7}
 N 3795 555 3840 555 {lab=IPG7}
 N 3840 555 3890 555 {lab=IPG7}
@@ -338,12 +290,6 @@ N 3840 615 3840 630 {lab=stim_drv}
 N 3890 615 3890 630 {lab=GND}
 N 3840 715 3840 745 {lab=bias_amp}
 N 3890 715 3890 745 {lab=GND}
-N 1325 1375 1385 1375 {lab=EN8}
-N 1325 1415 1385 1415 {lab=E8}
-N 1455 1265 1455 1325 {lab=MODE}
-N 1485 1265 1485 1325 {lab=RSTn}
-N 1525 1265 1525 1325 {lab=clk}
-N 1555 1265 1555 1325 {lab=MODEb}
 N 1625 1355 1695 1355 {lab=IPG8}
 N 1695 1355 1740 1355 {lab=IPG8}
 N 1740 1355 1790 1355 {lab=IPG8}
@@ -354,12 +300,6 @@ N 1740 1415 1740 1430 {lab=stim_drv}
 N 1790 1415 1790 1430 {lab=GND}
 N 1740 1515 1740 1545 {lab=bias_amp}
 N 1790 1515 1790 1545 {lab=GND}
-N 2025 1375 2085 1375 {lab=EN9}
-N 2025 1415 2085 1415 {lab=E9}
-N 2155 1265 2155 1325 {lab=MODE}
-N 2185 1265 2185 1325 {lab=RSTn}
-N 2225 1265 2225 1325 {lab=clk}
-N 2255 1265 2255 1325 {lab=MODEb}
 N 2325 1355 2395 1355 {lab=IPG9}
 N 2395 1355 2440 1355 {lab=IPG9}
 N 2440 1355 2490 1355 {lab=IPG9}
@@ -370,12 +310,6 @@ N 2440 1415 2440 1430 {lab=stim_drv}
 N 2490 1415 2490 1430 {lab=GND}
 N 2440 1515 2440 1545 {lab=bias_amp}
 N 2490 1515 2490 1545 {lab=GND}
-N 2725 1375 2785 1375 {lab=EN10}
-N 2725 1415 2785 1415 {lab=E10}
-N 2855 1265 2855 1325 {lab=MODE}
-N 2885 1265 2885 1325 {lab=RSTn}
-N 2925 1265 2925 1325 {lab=clk}
-N 2955 1265 2955 1325 {lab=MODEb}
 N 3025 1355 3095 1355 {lab=IPG10}
 N 3095 1355 3140 1355 {lab=IPG10}
 N 3140 1355 3190 1355 {lab=IPG10}
@@ -386,12 +320,6 @@ N 3140 1415 3140 1430 {lab=stim_drv}
 N 3190 1415 3190 1430 {lab=GND}
 N 3140 1515 3140 1545 {lab=bias_amp}
 N 3190 1515 3190 1545 {lab=GND}
-N 3425 1375 3485 1375 {lab=EN11}
-N 3425 1415 3485 1415 {lab=E11}
-N 3555 1265 3555 1325 {lab=MODE}
-N 3585 1265 3585 1325 {lab=RSTn}
-N 3625 1265 3625 1325 {lab=clk}
-N 3655 1265 3655 1325 {lab=MODEb}
 N 3725 1355 3795 1355 {lab=IPG11}
 N 3795 1355 3840 1355 {lab=IPG11}
 N 3840 1355 3890 1355 {lab=IPG11}
@@ -402,12 +330,6 @@ N 3840 1415 3840 1430 {lab=stim_drv}
 N 3890 1415 3890 1430 {lab=GND}
 N 3840 1515 3840 1545 {lab=bias_amp}
 N 3890 1515 3890 1545 {lab=GND}
-N 1325 2175 1385 2175 {lab=EN12}
-N 1325 2215 1385 2215 {lab=E12}
-N 1455 2065 1455 2125 {lab=MODE}
-N 1485 2065 1485 2125 {lab=RSTn}
-N 1525 2065 1525 2125 {lab=clk}
-N 1555 2065 1555 2125 {lab=MODEb}
 N 1625 2155 1695 2155 {lab=IPG12}
 N 1695 2155 1740 2155 {lab=IPG12}
 N 1740 2155 1790 2155 {lab=IPG12}
@@ -418,12 +340,6 @@ N 1740 2215 1740 2230 {lab=stim_drv}
 N 1790 2215 1790 2230 {lab=GND}
 N 1740 2315 1740 2345 {lab=bias_amp}
 N 1790 2315 1790 2345 {lab=GND}
-N 2025 2175 2085 2175 {lab=EN13}
-N 2025 2215 2085 2215 {lab=E13}
-N 2155 2065 2155 2125 {lab=MODE}
-N 2185 2065 2185 2125 {lab=RSTn}
-N 2225 2065 2225 2125 {lab=clk}
-N 2255 2065 2255 2125 {lab=MODEb}
 N 2325 2155 2395 2155 {lab=IPG13}
 N 2395 2155 2440 2155 {lab=IPG13}
 N 2440 2155 2490 2155 {lab=IPG13}
@@ -434,12 +350,6 @@ N 2440 2215 2440 2230 {lab=stim_drv}
 N 2490 2215 2490 2230 {lab=GND}
 N 2440 2315 2440 2345 {lab=bias_amp}
 N 2490 2315 2490 2345 {lab=GND}
-N 2725 2175 2785 2175 {lab=EN14}
-N 2725 2215 2785 2215 {lab=E14}
-N 2855 2065 2855 2125 {lab=MODE}
-N 2885 2065 2885 2125 {lab=RSTn}
-N 2925 2065 2925 2125 {lab=clk}
-N 2955 2065 2955 2125 {lab=MODEb}
 N 3025 2155 3095 2155 {lab=IPG14}
 N 3095 2155 3140 2155 {lab=IPG14}
 N 3140 2155 3190 2155 {lab=IPG14}
@@ -450,12 +360,6 @@ N 3140 2215 3140 2230 {lab=stim_drv}
 N 3190 2215 3190 2230 {lab=GND}
 N 3140 2315 3140 2345 {lab=bias_amp}
 N 3190 2315 3190 2345 {lab=GND}
-N 3425 2175 3485 2175 {lab=EN15}
-N 3425 2215 3485 2215 {lab=E15}
-N 3555 2065 3555 2125 {lab=MODE}
-N 3585 2065 3585 2125 {lab=RSTn}
-N 3625 2065 3625 2125 {lab=clk}
-N 3655 2065 3655 2125 {lab=MODEb}
 N 3725 2155 3795 2155 {lab=IPG15}
 N 3795 2155 3840 2155 {lab=IPG15}
 N 3840 2155 3890 2155 {lab=IPG15}
@@ -663,12 +567,6 @@ C {capa.sym} 3080 350 0 0 {name=C_dl15 value=300n m=1 device="ceramic capacitor"
 C {res.sym} 3160 350 0 0 {name=R_ct15 value=50k device=resistor m=1}
 C {lab_wire.sym} 3080 110 0 0 {name=p_brain_at_Rs15 sig_type=std_logic lab=brain_node15}
 C {lab_wire.sym} 3080 410 0 0 {name=p_E_at_Rct15 sig_type=std_logic lab=E15}
-C {lab_wire.sym} 1360 -225 0 0 {name=p_EN_x0 sig_type=std_logic lab=EN0}
-C {lab_wire.sym} 1350 -185 0 0 {name=p_E_x0 sig_type=std_logic lab=E0}
-C {lab_wire.sym} 1455 -325 3 0 {name=p_MODE_x0 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 1485 -325 3 0 {name=p_RSTn_x0 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 1525 -325 3 0 {name=p_clk_x0 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 1555 -325 3 0 {name=p_MODEb_x0 sig_type=std_logic lab=MODEb}
 C {res.sym} 1740 -215 0 0 {name=R_drv0 value=100 device=resistor m=1}
 C {capa.sym} 1790 -215 0 0 {name=C_pad_IPG0 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 1790 -170 0 0 {name=l_pad_IPG0 lab=GND}
@@ -679,13 +577,6 @@ C {gnd.sym} 1790 -55 0 0 {name=l_pad_REC0 lab=GND}
 C {lab_wire.sym} 1740 -55 1 0 {name=p_bias_x0 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 1690 -245 0 0 {name=p_IPG_x0 sig_type=std_logic lab=IPG0}
 C {lab_wire.sym} 1690 -145 0 0 {name=p_REC_x0 sig_type=std_logic lab=REC0}
-C {ENGN1600-Project/row_fixed_dt.sym} 1500 -200 0 0 {name=x0}
-C {lab_wire.sym} 2060 -225 0 0 {name=p_EN_x1 sig_type=std_logic lab=EN1}
-C {lab_wire.sym} 2050 -185 0 0 {name=p_E_x1 sig_type=std_logic lab=E1}
-C {lab_wire.sym} 2155 -325 3 0 {name=p_MODE_x1 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2185 -325 3 0 {name=p_RSTn_x1 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2225 -325 3 0 {name=p_clk_x1 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2255 -325 3 0 {name=p_MODEb_x1 sig_type=std_logic lab=MODEb}
 C {res.sym} 2440 -215 0 0 {name=R_drv1 value=100 device=resistor m=1}
 C {capa.sym} 2490 -215 0 0 {name=C_pad_IPG1 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 2490 -170 0 0 {name=l_pad_IPG1 lab=GND}
@@ -696,13 +587,6 @@ C {gnd.sym} 2490 -55 0 0 {name=l_pad_REC1 lab=GND}
 C {lab_wire.sym} 2440 -55 1 0 {name=p_bias_x1 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 2390 -245 0 0 {name=p_IPG_x1 sig_type=std_logic lab=IPG1}
 C {lab_wire.sym} 2390 -145 0 0 {name=p_REC_x1 sig_type=std_logic lab=REC1}
-C {ENGN1600-Project/row_fixed_dt.sym} 2200 -200 0 0 {name=x1}
-C {lab_wire.sym} 2760 -225 0 0 {name=p_EN_x2 sig_type=std_logic lab=EN2}
-C {lab_wire.sym} 2750 -185 0 0 {name=p_E_x2 sig_type=std_logic lab=E2}
-C {lab_wire.sym} 2855 -325 3 0 {name=p_MODE_x2 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2885 -325 3 0 {name=p_RSTn_x2 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2925 -325 3 0 {name=p_clk_x2 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2955 -325 3 0 {name=p_MODEb_x2 sig_type=std_logic lab=MODEb}
 C {res.sym} 3140 -215 0 0 {name=R_drv2 value=100 device=resistor m=1}
 C {capa.sym} 3190 -215 0 0 {name=C_pad_IPG2 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3190 -170 0 0 {name=l_pad_IPG2 lab=GND}
@@ -713,13 +597,6 @@ C {gnd.sym} 3190 -55 0 0 {name=l_pad_REC2 lab=GND}
 C {lab_wire.sym} 3140 -55 1 0 {name=p_bias_x2 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3090 -245 0 0 {name=p_IPG_x2 sig_type=std_logic lab=IPG2}
 C {lab_wire.sym} 3090 -145 0 0 {name=p_REC_x2 sig_type=std_logic lab=REC2}
-C {ENGN1600-Project/row_fixed_dt.sym} 2900 -200 0 0 {name=x2}
-C {lab_wire.sym} 3460 -225 0 0 {name=p_EN_x3 sig_type=std_logic lab=EN3}
-C {lab_wire.sym} 3450 -185 0 0 {name=p_E_x3 sig_type=std_logic lab=E3}
-C {lab_wire.sym} 3555 -325 3 0 {name=p_MODE_x3 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 3585 -325 3 0 {name=p_RSTn_x3 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 3625 -325 3 0 {name=p_clk_x3 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 3655 -325 3 0 {name=p_MODEb_x3 sig_type=std_logic lab=MODEb}
 C {res.sym} 3840 -215 0 0 {name=R_drv3 value=100 device=resistor m=1}
 C {capa.sym} 3890 -215 0 0 {name=C_pad_IPG3 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3890 -170 0 0 {name=l_pad_IPG3 lab=GND}
@@ -730,13 +607,6 @@ C {gnd.sym} 3890 -55 0 0 {name=l_pad_REC3 lab=GND}
 C {lab_wire.sym} 3840 -55 1 0 {name=p_bias_x3 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3790 -245 0 0 {name=p_IPG_x3 sig_type=std_logic lab=IPG3}
 C {lab_wire.sym} 3790 -145 0 0 {name=p_REC_x3 sig_type=std_logic lab=REC3}
-C {ENGN1600-Project/row_fixed_dt.sym} 3600 -200 0 0 {name=x3}
-C {lab_wire.sym} 1360 575 0 0 {name=p_EN_x4 sig_type=std_logic lab=EN4}
-C {lab_wire.sym} 1350 615 0 0 {name=p_E_x4 sig_type=std_logic lab=E4}
-C {lab_wire.sym} 1455 475 3 0 {name=p_MODE_x4 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 1485 475 3 0 {name=p_RSTn_x4 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 1525 475 3 0 {name=p_clk_x4 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 1555 475 3 0 {name=p_MODEb_x4 sig_type=std_logic lab=MODEb}
 C {res.sym} 1740 585 0 0 {name=R_drv4 value=100 device=resistor m=1}
 C {capa.sym} 1790 585 0 0 {name=C_pad_IPG4 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 1790 630 0 0 {name=l_pad_IPG4 lab=GND}
@@ -747,13 +617,6 @@ C {gnd.sym} 1790 745 0 0 {name=l_pad_REC4 lab=GND}
 C {lab_wire.sym} 1740 745 1 0 {name=p_bias_x4 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 1690 555 0 0 {name=p_IPG_x4 sig_type=std_logic lab=IPG4}
 C {lab_wire.sym} 1690 655 0 0 {name=p_REC_x4 sig_type=std_logic lab=REC4}
-C {ENGN1600-Project/row_fixed_dt.sym} 1500 600 0 0 {name=x4}
-C {lab_wire.sym} 2060 575 0 0 {name=p_EN_x5 sig_type=std_logic lab=EN5}
-C {lab_wire.sym} 2050 615 0 0 {name=p_E_x5 sig_type=std_logic lab=E5}
-C {lab_wire.sym} 2155 475 3 0 {name=p_MODE_x5 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2185 475 3 0 {name=p_RSTn_x5 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2225 475 3 0 {name=p_clk_x5 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2255 475 3 0 {name=p_MODEb_x5 sig_type=std_logic lab=MODEb}
 C {res.sym} 2440 585 0 0 {name=R_drv5 value=100 device=resistor m=1}
 C {capa.sym} 2490 585 0 0 {name=C_pad_IPG5 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 2490 630 0 0 {name=l_pad_IPG5 lab=GND}
@@ -764,13 +627,6 @@ C {gnd.sym} 2490 745 0 0 {name=l_pad_REC5 lab=GND}
 C {lab_wire.sym} 2440 745 1 0 {name=p_bias_x5 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 2390 555 0 0 {name=p_IPG_x5 sig_type=std_logic lab=IPG5}
 C {lab_wire.sym} 2390 655 0 0 {name=p_REC_x5 sig_type=std_logic lab=REC5}
-C {ENGN1600-Project/row_fixed_dt.sym} 2200 600 0 0 {name=x5}
-C {lab_wire.sym} 2760 575 0 0 {name=p_EN_x6 sig_type=std_logic lab=EN6}
-C {lab_wire.sym} 2750 615 0 0 {name=p_E_x6 sig_type=std_logic lab=E6}
-C {lab_wire.sym} 2855 475 3 0 {name=p_MODE_x6 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2885 475 3 0 {name=p_RSTn_x6 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2925 475 3 0 {name=p_clk_x6 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2955 475 3 0 {name=p_MODEb_x6 sig_type=std_logic lab=MODEb}
 C {res.sym} 3140 585 0 0 {name=R_drv6 value=100 device=resistor m=1}
 C {capa.sym} 3190 585 0 0 {name=C_pad_IPG6 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3190 630 0 0 {name=l_pad_IPG6 lab=GND}
@@ -781,13 +637,6 @@ C {gnd.sym} 3190 745 0 0 {name=l_pad_REC6 lab=GND}
 C {lab_wire.sym} 3140 745 1 0 {name=p_bias_x6 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3090 555 0 0 {name=p_IPG_x6 sig_type=std_logic lab=IPG6}
 C {lab_wire.sym} 3090 655 0 0 {name=p_REC_x6 sig_type=std_logic lab=REC6}
-C {ENGN1600-Project/row_fixed_dt.sym} 2900 600 0 0 {name=x6}
-C {lab_wire.sym} 3460 575 0 0 {name=p_EN_x7 sig_type=std_logic lab=EN7}
-C {lab_wire.sym} 3450 615 0 0 {name=p_E_x7 sig_type=std_logic lab=E7}
-C {lab_wire.sym} 3555 475 3 0 {name=p_MODE_x7 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 3585 475 3 0 {name=p_RSTn_x7 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 3625 475 3 0 {name=p_clk_x7 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 3655 475 3 0 {name=p_MODEb_x7 sig_type=std_logic lab=MODEb}
 C {res.sym} 3840 585 0 0 {name=R_drv7 value=100 device=resistor m=1}
 C {capa.sym} 3890 585 0 0 {name=C_pad_IPG7 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3890 630 0 0 {name=l_pad_IPG7 lab=GND}
@@ -798,13 +647,6 @@ C {gnd.sym} 3890 745 0 0 {name=l_pad_REC7 lab=GND}
 C {lab_wire.sym} 3840 745 1 0 {name=p_bias_x7 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3790 555 0 0 {name=p_IPG_x7 sig_type=std_logic lab=IPG7}
 C {lab_wire.sym} 3790 655 0 0 {name=p_REC_x7 sig_type=std_logic lab=REC7}
-C {ENGN1600-Project/row_fixed_dt.sym} 3600 600 0 0 {name=x7}
-C {lab_wire.sym} 1360 1375 0 0 {name=p_EN_x8 sig_type=std_logic lab=EN8}
-C {lab_wire.sym} 1350 1415 0 0 {name=p_E_x8 sig_type=std_logic lab=E8}
-C {lab_wire.sym} 1455 1275 3 0 {name=p_MODE_x8 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 1485 1275 3 0 {name=p_RSTn_x8 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 1525 1275 3 0 {name=p_clk_x8 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 1555 1275 3 0 {name=p_MODEb_x8 sig_type=std_logic lab=MODEb}
 C {res.sym} 1740 1385 0 0 {name=R_drv8 value=100 device=resistor m=1}
 C {capa.sym} 1790 1385 0 0 {name=C_pad_IPG8 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 1790 1430 0 0 {name=l_pad_IPG8 lab=GND}
@@ -815,13 +657,6 @@ C {gnd.sym} 1790 1545 0 0 {name=l_pad_REC8 lab=GND}
 C {lab_wire.sym} 1740 1545 1 0 {name=p_bias_x8 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 1690 1355 0 0 {name=p_IPG_x8 sig_type=std_logic lab=IPG8}
 C {lab_wire.sym} 1690 1455 0 0 {name=p_REC_x8 sig_type=std_logic lab=REC8}
-C {ENGN1600-Project/row_fixed_dt.sym} 1500 1400 0 0 {name=x8}
-C {lab_wire.sym} 2060 1375 0 0 {name=p_EN_x9 sig_type=std_logic lab=EN9}
-C {lab_wire.sym} 2050 1415 0 0 {name=p_E_x9 sig_type=std_logic lab=E9}
-C {lab_wire.sym} 2155 1275 3 0 {name=p_MODE_x9 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2185 1275 3 0 {name=p_RSTn_x9 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2225 1275 3 0 {name=p_clk_x9 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2255 1275 3 0 {name=p_MODEb_x9 sig_type=std_logic lab=MODEb}
 C {res.sym} 2440 1385 0 0 {name=R_drv9 value=100 device=resistor m=1}
 C {capa.sym} 2490 1385 0 0 {name=C_pad_IPG9 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 2490 1430 0 0 {name=l_pad_IPG9 lab=GND}
@@ -832,13 +667,6 @@ C {gnd.sym} 2490 1545 0 0 {name=l_pad_REC9 lab=GND}
 C {lab_wire.sym} 2440 1545 1 0 {name=p_bias_x9 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 2390 1355 0 0 {name=p_IPG_x9 sig_type=std_logic lab=IPG9}
 C {lab_wire.sym} 2390 1455 0 0 {name=p_REC_x9 sig_type=std_logic lab=REC9}
-C {ENGN1600-Project/row_fixed_dt.sym} 2200 1400 0 0 {name=x9}
-C {lab_wire.sym} 2760 1375 0 0 {name=p_EN_x10 sig_type=std_logic lab=EN10}
-C {lab_wire.sym} 2750 1415 0 0 {name=p_E_x10 sig_type=std_logic lab=E10}
-C {lab_wire.sym} 2855 1275 3 0 {name=p_MODE_x10 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2885 1275 3 0 {name=p_RSTn_x10 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2925 1275 3 0 {name=p_clk_x10 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2955 1275 3 0 {name=p_MODEb_x10 sig_type=std_logic lab=MODEb}
 C {res.sym} 3140 1385 0 0 {name=R_drv10 value=100 device=resistor m=1}
 C {capa.sym} 3190 1385 0 0 {name=C_pad_IPG10 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3190 1430 0 0 {name=l_pad_IPG10 lab=GND}
@@ -849,13 +677,6 @@ C {gnd.sym} 3190 1545 0 0 {name=l_pad_REC10 lab=GND}
 C {lab_wire.sym} 3140 1545 1 0 {name=p_bias_x10 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3090 1355 0 0 {name=p_IPG_x10 sig_type=std_logic lab=IPG10}
 C {lab_wire.sym} 3090 1455 0 0 {name=p_REC_x10 sig_type=std_logic lab=REC10}
-C {ENGN1600-Project/row_fixed_dt.sym} 2900 1400 0 0 {name=x10}
-C {lab_wire.sym} 3460 1375 0 0 {name=p_EN_x11 sig_type=std_logic lab=EN11}
-C {lab_wire.sym} 3450 1415 0 0 {name=p_E_x11 sig_type=std_logic lab=E11}
-C {lab_wire.sym} 3555 1275 3 0 {name=p_MODE_x11 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 3585 1275 3 0 {name=p_RSTn_x11 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 3625 1275 3 0 {name=p_clk_x11 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 3655 1275 3 0 {name=p_MODEb_x11 sig_type=std_logic lab=MODEb}
 C {res.sym} 3840 1385 0 0 {name=R_drv11 value=100 device=resistor m=1}
 C {capa.sym} 3890 1385 0 0 {name=C_pad_IPG11 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3890 1430 0 0 {name=l_pad_IPG11 lab=GND}
@@ -866,13 +687,6 @@ C {gnd.sym} 3890 1545 0 0 {name=l_pad_REC11 lab=GND}
 C {lab_wire.sym} 3840 1545 1 0 {name=p_bias_x11 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3790 1355 0 0 {name=p_IPG_x11 sig_type=std_logic lab=IPG11}
 C {lab_wire.sym} 3790 1455 0 0 {name=p_REC_x11 sig_type=std_logic lab=REC11}
-C {ENGN1600-Project/row_fixed_dt.sym} 3600 1400 0 0 {name=x11}
-C {lab_wire.sym} 1360 2175 0 0 {name=p_EN_x12 sig_type=std_logic lab=EN12}
-C {lab_wire.sym} 1350 2215 0 0 {name=p_E_x12 sig_type=std_logic lab=E12}
-C {lab_wire.sym} 1455 2075 3 0 {name=p_MODE_x12 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 1485 2075 3 0 {name=p_RSTn_x12 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 1525 2075 3 0 {name=p_clk_x12 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 1555 2075 3 0 {name=p_MODEb_x12 sig_type=std_logic lab=MODEb}
 C {res.sym} 1740 2185 0 0 {name=R_drv12 value=100 device=resistor m=1}
 C {capa.sym} 1790 2185 0 0 {name=C_pad_IPG12 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 1790 2230 0 0 {name=l_pad_IPG12 lab=GND}
@@ -883,13 +697,6 @@ C {gnd.sym} 1790 2345 0 0 {name=l_pad_REC12 lab=GND}
 C {lab_wire.sym} 1740 2345 1 0 {name=p_bias_x12 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 1690 2155 0 0 {name=p_IPG_x12 sig_type=std_logic lab=IPG12}
 C {lab_wire.sym} 1690 2255 0 0 {name=p_REC_x12 sig_type=std_logic lab=REC12}
-C {ENGN1600-Project/row_fixed_dt.sym} 1500 2200 0 0 {name=x12}
-C {lab_wire.sym} 2060 2175 0 0 {name=p_EN_x13 sig_type=std_logic lab=EN13}
-C {lab_wire.sym} 2050 2215 0 0 {name=p_E_x13 sig_type=std_logic lab=E13}
-C {lab_wire.sym} 2155 2075 3 0 {name=p_MODE_x13 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2185 2075 3 0 {name=p_RSTn_x13 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2225 2075 3 0 {name=p_clk_x13 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2255 2075 3 0 {name=p_MODEb_x13 sig_type=std_logic lab=MODEb}
 C {res.sym} 2440 2185 0 0 {name=R_drv13 value=100 device=resistor m=1}
 C {capa.sym} 2490 2185 0 0 {name=C_pad_IPG13 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 2490 2230 0 0 {name=l_pad_IPG13 lab=GND}
@@ -900,13 +707,6 @@ C {gnd.sym} 2490 2345 0 0 {name=l_pad_REC13 lab=GND}
 C {lab_wire.sym} 2440 2345 1 0 {name=p_bias_x13 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 2390 2155 0 0 {name=p_IPG_x13 sig_type=std_logic lab=IPG13}
 C {lab_wire.sym} 2390 2255 0 0 {name=p_REC_x13 sig_type=std_logic lab=REC13}
-C {ENGN1600-Project/row_fixed_dt.sym} 2200 2200 0 0 {name=x13}
-C {lab_wire.sym} 2760 2175 0 0 {name=p_EN_x14 sig_type=std_logic lab=EN14}
-C {lab_wire.sym} 2750 2215 0 0 {name=p_E_x14 sig_type=std_logic lab=E14}
-C {lab_wire.sym} 2855 2075 3 0 {name=p_MODE_x14 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 2885 2075 3 0 {name=p_RSTn_x14 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 2925 2075 3 0 {name=p_clk_x14 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 2955 2075 3 0 {name=p_MODEb_x14 sig_type=std_logic lab=MODEb}
 C {res.sym} 3140 2185 0 0 {name=R_drv14 value=100 device=resistor m=1}
 C {capa.sym} 3190 2185 0 0 {name=C_pad_IPG14 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3190 2230 0 0 {name=l_pad_IPG14 lab=GND}
@@ -917,13 +717,6 @@ C {gnd.sym} 3190 2345 0 0 {name=l_pad_REC14 lab=GND}
 C {lab_wire.sym} 3140 2345 1 0 {name=p_bias_x14 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3090 2155 0 0 {name=p_IPG_x14 sig_type=std_logic lab=IPG14}
 C {lab_wire.sym} 3090 2255 0 0 {name=p_REC_x14 sig_type=std_logic lab=REC14}
-C {ENGN1600-Project/row_fixed_dt.sym} 2900 2200 0 0 {name=x14}
-C {lab_wire.sym} 3460 2175 0 0 {name=p_EN_x15 sig_type=std_logic lab=EN15}
-C {lab_wire.sym} 3450 2215 0 0 {name=p_E_x15 sig_type=std_logic lab=E15}
-C {lab_wire.sym} 3555 2075 3 0 {name=p_MODE_x15 sig_type=std_logic lab=MODE}
-C {lab_wire.sym} 3585 2075 3 0 {name=p_RSTn_x15 sig_type=std_logic lab=RSTn}
-C {lab_wire.sym} 3625 2075 3 0 {name=p_clk_x15 sig_type=std_logic lab=clk}
-C {lab_wire.sym} 3655 2075 3 0 {name=p_MODEb_x15 sig_type=std_logic lab=MODEb}
 C {res.sym} 3840 2185 0 0 {name=R_drv15 value=100 device=resistor m=1}
 C {capa.sym} 3890 2185 0 0 {name=C_pad_IPG15 value=2p m=1 device="ceramic capacitor"}
 C {gnd.sym} 3890 2230 0 0 {name=l_pad_IPG15 lab=GND}
@@ -934,7 +727,6 @@ C {gnd.sym} 3890 2345 0 0 {name=l_pad_REC15 lab=GND}
 C {lab_wire.sym} 3840 2345 1 0 {name=p_bias_x15 sig_type=std_logic lab=bias_amp}
 C {lab_wire.sym} 3790 2155 0 0 {name=p_IPG_x15 sig_type=std_logic lab=IPG15}
 C {lab_wire.sym} 3790 2255 0 0 {name=p_REC_x15 sig_type=std_logic lab=REC15}
-C {ENGN1600-Project/row_fixed_dt.sym} 3600 2200 0 0 {name=x15}
 C {devices/code_shown.sym} -30 1100 0 0 {name=MODELS only_toplevel=true
 format="tcleval( @value )"
 value="
@@ -1041,3 +833,71 @@ plot v(REC0) v(REC1)+1 v(REC2)+2 v(REC3)+3 v(REC4)+4 v(REC5)+5 v(REC6)+6 v(REC7)
 write tb_realistic_16ch.raw
 .endc
 "}
+C {full.sym} 920 1680 0 0 {name=Xchip}
+C {lab_wire.sym} 770 1340 0 0 {name=p_EN0_at_chip sig_type=std_logic lab=EN0}
+C {lab_wire.sym} 770 1360 0 0 {name=p_MODE_at_chip sig_type=std_logic lab=MODE}
+C {lab_wire.sym} 770 1380 0 0 {name=p_clk_at_chip sig_type=std_logic lab=clk}
+C {lab_wire.sym} 770 1400 0 0 {name=p_E0_at_chip sig_type=std_logic lab=E0}
+C {lab_wire.sym} 770 1420 0 0 {name=p_RSTn_at_chip sig_type=std_logic lab=RSTn}
+C {lab_wire.sym} 770 1440 0 0 {name=p_EN1_at_chip sig_type=std_logic lab=EN1}
+C {lab_wire.sym} 770 1460 0 0 {name=p_E1_at_chip sig_type=std_logic lab=E1}
+C {lab_wire.sym} 770 1480 0 0 {name=p_EN2_at_chip sig_type=std_logic lab=EN2}
+C {lab_wire.sym} 770 1500 0 0 {name=p_E2_at_chip sig_type=std_logic lab=E2}
+C {lab_wire.sym} 770 1520 0 0 {name=p_EN3_at_chip sig_type=std_logic lab=EN3}
+C {lab_wire.sym} 770 1540 0 0 {name=p_E3_at_chip sig_type=std_logic lab=E3}
+C {lab_wire.sym} 770 1560 0 0 {name=p_EN4_at_chip sig_type=std_logic lab=EN4}
+C {lab_wire.sym} 770 1580 0 0 {name=p_E4_at_chip sig_type=std_logic lab=E4}
+C {lab_wire.sym} 770 1600 0 0 {name=p_EN5_at_chip sig_type=std_logic lab=EN5}
+C {lab_wire.sym} 770 1620 0 0 {name=p_E5_at_chip sig_type=std_logic lab=E5}
+C {lab_wire.sym} 770 1640 0 0 {name=p_EN6_at_chip sig_type=std_logic lab=EN6}
+C {lab_wire.sym} 770 1660 0 0 {name=p_E6_at_chip sig_type=std_logic lab=E6}
+C {lab_wire.sym} 770 1680 0 0 {name=p_EN7_at_chip sig_type=std_logic lab=EN7}
+C {lab_wire.sym} 770 1700 0 0 {name=p_E7_at_chip sig_type=std_logic lab=E7}
+C {lab_wire.sym} 770 1720 0 0 {name=p_EN8_at_chip sig_type=std_logic lab=EN8}
+C {lab_wire.sym} 770 1740 0 0 {name=p_E8_at_chip sig_type=std_logic lab=E8}
+C {lab_wire.sym} 770 1760 0 0 {name=p_EN9_at_chip sig_type=std_logic lab=EN9}
+C {lab_wire.sym} 770 1780 0 0 {name=p_E9_at_chip sig_type=std_logic lab=E9}
+C {lab_wire.sym} 770 1800 0 0 {name=p_EN10_at_chip sig_type=std_logic lab=EN10}
+C {lab_wire.sym} 770 1820 0 0 {name=p_E10_at_chip sig_type=std_logic lab=E10}
+C {lab_wire.sym} 770 1840 0 0 {name=p_EN11_at_chip sig_type=std_logic lab=EN11}
+C {lab_wire.sym} 770 1860 0 0 {name=p_E11_at_chip sig_type=std_logic lab=E11}
+C {lab_wire.sym} 770 1880 0 0 {name=p_EN12_at_chip sig_type=std_logic lab=EN12}
+C {lab_wire.sym} 770 1900 0 0 {name=p_E12_at_chip sig_type=std_logic lab=E12}
+C {lab_wire.sym} 770 1920 0 0 {name=p_EN13_at_chip sig_type=std_logic lab=EN13}
+C {lab_wire.sym} 770 1940 0 0 {name=p_E13_at_chip sig_type=std_logic lab=E13}
+C {lab_wire.sym} 770 1960 0 0 {name=p_EN14_at_chip sig_type=std_logic lab=EN14}
+C {lab_wire.sym} 770 1980 0 0 {name=p_E14_at_chip sig_type=std_logic lab=E14}
+C {lab_wire.sym} 770 2000 0 0 {name=p_EN15_at_chip sig_type=std_logic lab=EN15}
+C {lab_wire.sym} 770 2020 0 0 {name=p_E15_at_chip sig_type=std_logic lab=E15}
+C {lab_wire.sym} 1070 1340 0 1 {name=p_IPG0_at_chip sig_type=std_logic lab=IPG0}
+C {lab_wire.sym} 1070 1360 0 1 {name=p_REC0_at_chip sig_type=std_logic lab=REC0}
+C {lab_wire.sym} 1070 1380 0 1 {name=p_IPG1_at_chip sig_type=std_logic lab=IPG1}
+C {lab_wire.sym} 1070 1400 0 1 {name=p_REC1_at_chip sig_type=std_logic lab=REC1}
+C {lab_wire.sym} 1070 1420 0 1 {name=p_IPG2_at_chip sig_type=std_logic lab=IPG2}
+C {lab_wire.sym} 1070 1440 0 1 {name=p_REC2_at_chip sig_type=std_logic lab=REC2}
+C {lab_wire.sym} 1070 1460 0 1 {name=p_IPG3_at_chip sig_type=std_logic lab=IPG3}
+C {lab_wire.sym} 1070 1480 0 1 {name=p_REC3_at_chip sig_type=std_logic lab=REC3}
+C {lab_wire.sym} 1070 1500 0 1 {name=p_IPG4_at_chip sig_type=std_logic lab=IPG4}
+C {lab_wire.sym} 1070 1520 0 1 {name=p_REC4_at_chip sig_type=std_logic lab=REC4}
+C {lab_wire.sym} 1070 1540 0 1 {name=p_IPG5_at_chip sig_type=std_logic lab=IPG5}
+C {lab_wire.sym} 1070 1560 0 1 {name=p_REC5_at_chip sig_type=std_logic lab=REC5}
+C {lab_wire.sym} 1070 1580 0 1 {name=p_IPG6_at_chip sig_type=std_logic lab=IPG6}
+C {lab_wire.sym} 1070 1600 0 1 {name=p_REC6_at_chip sig_type=std_logic lab=REC6}
+C {lab_wire.sym} 1070 1620 0 1 {name=p_IPG7_at_chip sig_type=std_logic lab=IPG7}
+C {lab_wire.sym} 1070 1640 0 1 {name=p_REC7_at_chip sig_type=std_logic lab=REC7}
+C {lab_wire.sym} 1070 1660 0 1 {name=p_IPG8_at_chip sig_type=std_logic lab=IPG8}
+C {lab_wire.sym} 1070 1680 0 1 {name=p_REC8_at_chip sig_type=std_logic lab=REC8}
+C {lab_wire.sym} 1070 1700 0 1 {name=p_IPG9_at_chip sig_type=std_logic lab=IPG9}
+C {lab_wire.sym} 1070 1720 0 1 {name=p_REC9_at_chip sig_type=std_logic lab=REC9}
+C {lab_wire.sym} 1070 1740 0 1 {name=p_IPG10_at_chip sig_type=std_logic lab=IPG10}
+C {lab_wire.sym} 1070 1760 0 1 {name=p_REC10_at_chip sig_type=std_logic lab=REC10}
+C {lab_wire.sym} 1070 1780 0 1 {name=p_IPG11_at_chip sig_type=std_logic lab=IPG11}
+C {lab_wire.sym} 1070 1800 0 1 {name=p_REC11_at_chip sig_type=std_logic lab=REC11}
+C {lab_wire.sym} 1070 1820 0 1 {name=p_IPG12_at_chip sig_type=std_logic lab=IPG12}
+C {lab_wire.sym} 1070 1840 0 1 {name=p_REC12_at_chip sig_type=std_logic lab=REC12}
+C {lab_wire.sym} 1070 1860 0 1 {name=p_IPG13_at_chip sig_type=std_logic lab=IPG13}
+C {lab_wire.sym} 1070 1880 0 1 {name=p_REC13_at_chip sig_type=std_logic lab=REC13}
+C {lab_wire.sym} 1070 1900 0 1 {name=p_IPG14_at_chip sig_type=std_logic lab=IPG14}
+C {lab_wire.sym} 1070 1920 0 1 {name=p_REC14_at_chip sig_type=std_logic lab=REC14}
+C {lab_wire.sym} 1070 1940 0 1 {name=p_IPG15_at_chip sig_type=std_logic lab=IPG15}
+C {lab_wire.sym} 1070 1960 0 1 {name=p_REC15_at_chip sig_type=std_logic lab=REC15}
