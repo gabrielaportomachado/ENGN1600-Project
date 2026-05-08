@@ -1,0 +1,208 @@
+** sch_path: /foss/designs/ENGN1600-Project/untitled.sch
+.SUBCKT untitled
+
+V_vdd vdd GND 3.3
+V_RSTn RSTn GND 0
+V_clk clk GND 0
+V_EN EN GND 0
+V_MODE MODE GND 0
+V_MODEb MODEb GND 3.3
+V_brain brain_node GND 1.65
+V_bias_amp bias_amp GND 1.65
+V_stim stim_drv GND 1.65
+R_s brain_node tissue_node 1k m=1
+R_ct tissue_node E_pin 50k m=1
+C_dl tissue_node E_pin 300n m=1
+R_drv IPG_pin stim_drv 100 m=1
+C_pad_IPG IPG_pin GND 2p m=1
+R_amp REC_pin bias_amp 1G m=1
+C_pad_REC REC_pin GND 2p m=1
+**** begin user architecture code
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+
+
+
+
+.SUBCKT ROW VDD SW_REC_pre SW_REC SW_RECb E REC RSTn EN CLK MODE SW_IPGb GND
++ EN_CFG EN_CFGb IPG MODEb SW_IPG_pre SW_IPG
+M$1 $8 SW_REC_pre VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.42P PS=3.3U
++ PD=1.84U
+M$2 VDD SW_IPGb $8 VDD pfet_03v3 L=0.28U W=1U AS=0.42P AD=0.735P PS=1.84U
++ PD=2.47U
+M$3 SW_REC $8 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.735P AD=0.635P PS=2.47U
++ PD=3.27U
+M$4 SW_RECb SW_REC VDD VDD pfet_03v3 L=0.28U W=1U AS=0.55P AD=0.65P PS=3.1U
++ PD=3.3U
+M$5 REC SW_RECb E VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$6 $3 $13 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.76P AD=0.65P PS=3.52U PD=3.3U
+M$7 VDD $3 $4 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$8 $4 RSTn VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$9 $13 $2 $4 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.59P PS=3.3U PD=3.18U
+M$10 $5 EN $13 VDD pfet_03v3 L=0.28U W=1U AS=0.63P AD=0.605P PS=3.26U PD=3.21U
+M$11 VDD $15 $5 VDD pfet_03v3 L=0.28U W=1U AS=0.63P AD=0.54P PS=3.26U PD=3.08U
+M$12 VDD $2 $15 VDD pfet_03v3 L=0.28U W=1U AS=0.63P AD=0.64P PS=3.26U PD=3.28U
+M$13 VDD CLK $2 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$14 $6 MODE VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.42P PS=3.3U PD=1.84U
+M$15 VDD EN_CFG $6 VDD pfet_03v3 L=0.28U W=1U AS=0.42P AD=0.735P PS=1.84U
++ PD=2.47U
+M$16 SW_REC_pre $6 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.735P AD=0.64P PS=2.47U
++ PD=3.28U
+M$17 $55 $53 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$18 $85 $55 $53 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$19 VDD $15 $85 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$20 EN_CFG $55 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U
++ PD=3.3U
+M$21 $58 $55 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$22 EN_CFGb $58 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U
++ PD=3.3U
+M$23 $60 MODEb VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.42P PS=3.3U
++ PD=1.84U
+M$24 VDD EN_CFG $60 VDD pfet_03v3 L=0.28U W=1U AS=0.42P AD=0.735P PS=1.84U
++ PD=2.47U
+M$25 SW_IPG_pre $60 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.735P AD=0.63P PS=2.47U
++ PD=3.26U
+M$26 $53 $2 $3 VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$27 $55 RSTn VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$28 $61 SW_IPG_pre VDD VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.42P PS=3.3U
++ PD=1.84U
+M$29 VDD SW_RECb $61 VDD pfet_03v3 L=0.28U W=1U AS=0.42P AD=0.735P PS=1.84U
++ PD=2.47U
+M$30 SW_IPG $61 VDD VDD pfet_03v3 L=0.28U W=1U AS=0.735P AD=0.63P PS=2.47U
++ PD=3.26U
+M$31 SW_IPGb SW_IPG VDD VDD pfet_03v3 L=0.28U W=1U AS=0.56P AD=0.65P PS=3.12U
++ PD=3.3U
+M$32 IPG SW_IPGb E VDD pfet_03v3 L=0.28U W=1U AS=0.65P AD=0.65P PS=3.3U PD=3.3U
+M$33 SW_REC $8 GND GND nfet_03v3 L=0.28U W=0.5U AS=0.2425P AD=0.315P PS=1.97U
++ PD=2.26U
+M$34 SW_RECb SW_REC GND GND nfet_03v3 L=0.28U W=0.5U AS=0.2825P AD=0.315P
++ PS=2.13U PD=2.26U
+M$35 SW_REC_pre $6 GND GND nfet_03v3 L=0.28U W=0.5U AS=0.2425P AD=0.3125P
++ PS=1.97U PD=2.25U
+M$36 $52 SW_REC_pre GND GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.42P PS=3.26U
++ PD=1.84U
+M$37 $8 SW_IPGb $52 GND nfet_03v3 L=0.28U W=1U AS=0.42P AD=0.65P PS=1.84U
++ PD=3.3U
+M$38 REC SW_REC E GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.63P PS=3.26U PD=3.26U
+M$39 $3 $13 GND GND nfet_03v3 L=0.28U W=1U AS=0.76P AD=0.61P PS=3.52U PD=3.22U
+M$40 $33 $3 GND GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U PD=3.22U
+M$41 $4 RSTn $33 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$42 $13 $15 $4 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$43 $34 EN $13 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U PD=3.22U
+M$44 GND $2 $34 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.575P PS=3.22U
++ PD=3.15U
+M$45 GND $2 $15 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U PD=3.22U
+M$46 GND CLK $2 GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.67P PS=3.26U PD=3.34U
+M$47 $46 MODE GND GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.42P PS=3.26U
++ PD=1.84U
+M$48 $6 EN_CFG $46 GND nfet_03v3 L=0.28U W=1U AS=0.42P AD=0.65P PS=1.84U
++ PD=3.3U
+M$49 $53 $15 $3 GND nfet_03v3 L=0.28U W=1U AS=0.715P AD=0.61P PS=3.43U
++ PD=3.22U
+M$50 $54 RSTn GND GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$51 $55 $53 $54 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$52 $56 $55 $53 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$53 GND $2 $56 GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U PD=3.22U
+M$54 EN_CFG $55 GND GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$55 $58 $55 GND GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$56 EN_CFGb $58 GND GND nfet_03v3 L=0.28U W=1U AS=0.61P AD=0.61P PS=3.22U
++ PD=3.22U
+M$57 $80 MODEb GND GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.42P PS=3.26U
++ PD=1.84U
+M$58 $60 EN_CFG $80 GND nfet_03v3 L=0.28U W=1U AS=0.42P AD=0.65P PS=1.84U
++ PD=3.3U
+M$59 SW_IPG_pre $60 GND GND nfet_03v3 L=0.28U W=0.5U AS=0.2425P AD=0.31P
++ PS=1.97U PD=2.24U
+M$60 $79 SW_IPG_pre GND GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.42P PS=3.26U
++ PD=1.84U
+M$61 $61 SW_RECb $79 GND nfet_03v3 L=0.28U W=1U AS=0.42P AD=0.65P PS=1.84U
++ PD=3.3U
+M$62 SW_IPG $61 GND GND nfet_03v3 L=0.28U W=0.5U AS=0.2425P AD=0.3275P
++ PS=1.97U PD=2.31U
+M$63 SW_IPGb SW_IPG GND GND nfet_03v3 L=0.28U W=0.5U AS=0.285P AD=0.315P
++ PS=2.14U PD=2.26U
+M$64 IPG SW_IPG E GND nfet_03v3 L=0.28U W=1U AS=0.63P AD=0.63P PS=3.26U PD=3.26U
+.ENDS ROW
+
+X0 vdd SW_REC_pre SW_REC SW_RECb E_pin REC_pin RSTn EN clk MODE SW_IPGb GND
++ EN_CFG EN_CFGb IPG_pin MODEb SW_IPG_pre SW_IPG ROW
+
+
+
+
+.control
+save all
+
+** RSTn: low until 100ns then high
+alter @V_RSTn[PWL] = [ 0 0  100n 0  100.001n 3.3  30m 3.3 ]
+
+** Single latching clock pulse around 200ns
+alter @V_clk[PWL] = [ 0 0  200n 0  200.001n 3.3  300n 3.3  300.001n 0  30m 0 ]
+
+** EN: high after RSTn release
+alter @V_EN[PWL] = [ 0 0  150n 0  150.001n 3.3  30m 3.3 ]
+
+** MODE: stim phase 0-15ms (includes drain), record phase 15-30ms
+alter @V_MODE[PWL]  = [ 0 0    15m 0    15.0001m 3.3   30m 3.3 ]
+alter @V_MODEb[PWL] = [ 0 3.3  15m 3.3  15.0001m 0     30m 0 ]
+
+** Brain LFP: 100uV sine at 1kHz on 1.65V mid-rail
+alter @V_brain[SIN] = [ 1.65 10m 1k 0 0 0 ]
+
+** Stim driver: biphasic pulses at 0.5/1.5/2.5/3.5/4.5 ms during stim phase,
+** then held at mid-rail for 10 ms drain before MODE switches.
+alter @V_stim[PWL] = [
++ 0          1.65
++ 500u       1.65
++ 500.001u   0.65
++ 600u       0.65
++ 600.001u   2.65
++ 700u       2.65
++ 700.001u   1.65
++ 1500u      1.65
++ 1500.001u  0.65
++ 1600u      0.65
++ 1600.001u  2.65
++ 1700u      2.65
++ 1700.001u  1.65
++ 2500u      1.65
++ 2500.001u  0.65
++ 2600u      0.65
++ 2600.001u  2.65
++ 2700u      2.65
++ 2700.001u  1.65
++ 3500u      1.65
++ 3500.001u  0.65
++ 3600u      0.65
++ 3600.001u  2.65
++ 3700u      2.65
++ 3700.001u  1.65
++ 4500u      1.65
++ 4500.001u  0.65
++ 4600u      0.65
++ 4600.001u  2.65
++ 4700u      2.65
++ 4700.001u  1.65
++ 30m        1.65 ]
+
+tran 1u 30m 0 5u
+
+** plots
+set color0 = white
+plot (v(MODE)/6.6)+1.4 v(REC_pin) v(E_pin) v(IPG_pin)/3 + (1.65-1.65/3)
+
+write tb_realistic.raw
+.endc
+
+
+**** end user architecture code
+.ENDS
+.GLOBAL GND
