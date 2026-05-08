@@ -14,8 +14,8 @@ N 230 -60 290 -60 {lab=SW_IPG}
 N 230 60 290 60 {lab=SW_REC}
 N 550 -80 550 -30 {lab=SW_IPG}
 N 550 130 550 180 {lab=SW_REC}
-N 370 -60 430 -60 {lab=SW_IPGb}
-N 370 60 430 60 {lab=SW_RECb}
+N 350 -60 410 -60 {lab=SW_IPGb}
+N 350 60 410 60 {lab=SW_RECb}
 N 550 -190 550 -130 {lab=SW_IPGb}
 N 550 20 550 80 {lab=SW_RECb}
 N -300 -25 -275 -25 {lab=EN_cfg}
@@ -50,11 +50,11 @@ C {lab_wire.sym} 280 -60 0 0 {name=p13 sig_type=std_logic lab=SW_IPG}
 C {TGATE/TGATE.sym} 590 120 0 0 {name=x6}
 C {lab_wire.sym} 550 -80 3 0 {name=p15 sig_type=std_logic lab=SW_IPG}
 C {ipin.sym} -40 80 0 0 {name=p7 lab=MODE}
-C {AND/INV.sym} 340 -60 0 0 {name=x5}
+C {AND/INV.sym} 320 -60 0 0 {name=x5}
 C {lab_wire.sym} 550 140 3 0 {name=p16 sig_type=std_logic lab=SW_REC}
-C {AND/INV.sym} 340 60 0 0 {name=x7}
-C {lab_wire.sym} 420 -60 0 0 {name=p11 sig_type=std_logic lab=SW_IPGb}
-C {lab_wire.sym} 420 60 0 0 {name=p17 sig_type=std_logic lab=SW_RECb}
+C {AND/INV.sym} 320 60 0 0 {name=x7}
+C {lab_wire.sym} 400 -60 0 0 {name=p11 sig_type=std_logic lab=SW_IPGb}
+C {lab_wire.sym} 400 60 0 0 {name=p17 sig_type=std_logic lab=SW_RECb}
 C {lab_wire.sym} 550 -130 1 0 {name=p18 sig_type=std_logic lab=SW_IPGb}
 C {lab_wire.sym} 550 80 1 0 {name=p19 sig_type=std_logic lab=SW_RECb}
 C {lab_wire.sym} -245 -25 0 0 {name=p20 sig_type=std_logic lab=EN_cfg}

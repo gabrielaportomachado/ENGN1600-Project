@@ -71,7 +71,6 @@ C {lab_wire.sym} -75 130 3 0 {name=p_bias_amp sig_type=std_logic lab=bias_amp}
 C {vsource.sym} -285 400 0 0 {name=V_stim value=1.65 savecurrent=false}
 C {gnd.sym} -285 470 0 0 {name=l_stim lab=GND}
 C {lab_wire.sym} -285 330 3 0 {name=p_stim sig_type=std_logic lab=stim_drv}
-C {row.sym} 280 0 0 0 {name=Xrow}
 C {lab_wire.sym} 140 -25 0 0 {name=p_EN_at_row sig_type=std_logic lab=EN}
 C {lab_wire.sym} 130 15 0 0 {name=p_E_at_row sig_type=std_logic lab=E_pin}
 C {lab_wire.sym} 235 -125 3 0 {name=p_MODE_at_row sig_type=std_logic lab=MODE}
@@ -165,6 +164,9 @@ tran 1u 30m 0 5u
 set color0 = white
 plot (v(MODE)/6.6)+1.4 v(REC_pin) v(E_pin) v(IPG_pin)/3 + (1.65-1.65/3)
 
+plot (v(MODE)/6.6)+1.4 v(REC_pin) v(E_pin) v(IPG_pin)/3 + (1.65-1.65/3) ylimit 1.649980 1.650015 xlimit 14.99997m 15.0002m
+
 write tb_realistic.raw
 .endc
 "}
+C {ENGN1600-Project/row_fixed_dt.sym} 280 0 0 0 {name=x1}
