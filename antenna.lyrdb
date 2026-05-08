@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <report-database>
  <description>GF180 ANTENNA DRC Run Report at</description>
- <original-file>ROW.gds</original-file>
+ <original-file>/foss/designs/engn1600-project/FULL.gds</original-file>
  <generator>drc: script='/foss/pdks/gf180mcuD/libs.tech/klayout/macros/gf180mcu_drc.lydrc'</generator>
- <top-cell>ROW</top-cell>
+ <top-cell>FULL</top-cell>
  <tags>
  </tags>
  <categories>
@@ -139,7 +139,7 @@
  </categories>
  <cells>
   <cell>
-   <name>ROW</name>
+   <name>FULL</name>
    <variant/>
    <layout-name/>
    <references>

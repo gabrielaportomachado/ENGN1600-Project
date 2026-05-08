@@ -140,7 +140,6 @@ N -80 4025 -20 4025 {lab=E15}
 N 120 3895 120 3935 {lab=clk}
 N 220 3965 270 3965 {lab=IPG15}
 N 220 4065 270 4065 {lab=REC15}
-C {row.sym} 95 -80 0 0 {name=x1}
 C {DFF/DFF.sym} -400 -50 0 0 {name=x2}
 C {ipin.sym} -370 0 3 0 {name=p24 lab=RSTn}
 C {ipin.sym} -445 -100 0 0 {name=p7 lab=MODE}
@@ -158,7 +157,6 @@ C {vdd.sym} -380 -190 0 0 {name=l2 lab=vdd}
 C {lab_wire.sym} -360 -185 2 0 {name=p13 sig_type=std_logic lab=GND}
 C {opin.sym} 270 -125 0 0 {name=p22 lab=IPG0}
 C {opin.sym} 270 -25 0 0 {name=p23 lab=REC0}
-C {row.sym} 95 185 0 0 {name=x3}
 C {lab_wire.sym} 50 95 1 0 {name=p10 sig_type=std_logic lab=MODE_cfg}
 C {lab_wire.sym} 80 95 1 0 {name=p12 sig_type=std_logic lab=RSTn}
 C {lab_wire.sym} 150 95 1 0 {name=p14 sig_type=std_logic lab=MODE_cfgb}
@@ -167,7 +165,6 @@ C {ipin.sym} -80 200 0 0 {name=p16 lab=E1}
 C {lab_wire.sym} 120 95 1 0 {name=p17 sig_type=std_logic lab=clk}
 C {opin.sym} 270 140 0 0 {name=p18 lab=IPG1}
 C {opin.sym} 270 240 0 0 {name=p19 lab=REC1}
-C {row.sym} 95 455 0 0 {name=x4}
 C {lab_wire.sym} 50 365 1 0 {name=p20 sig_type=std_logic lab=MODE_cfg}
 C {lab_wire.sym} 80 365 1 0 {name=p21 sig_type=std_logic lab=RSTn}
 C {lab_wire.sym} 150 365 1 0 {name=p25 sig_type=std_logic lab=MODE_cfgb}
@@ -176,7 +173,6 @@ C {ipin.sym} -80 470 0 0 {name=p27 lab=E2}
 C {lab_wire.sym} 120 365 1 0 {name=p28 sig_type=std_logic lab=clk}
 C {opin.sym} 270 410 0 0 {name=p29 lab=IPG2}
 C {opin.sym} 270 510 0 0 {name=p30 lab=REC2}
-C {row.sym} 95 720 0 0 {name=x5}
 C {lab_wire.sym} 50 630 1 0 {name=p31 sig_type=std_logic lab=MODE_cfg}
 C {lab_wire.sym} 80 630 1 0 {name=p32 sig_type=std_logic lab=RSTn}
 C {lab_wire.sym} 150 630 1 0 {name=p33 sig_type=std_logic lab=MODE_cfgb}
@@ -281,15 +277,19 @@ C {ipin.sym} -80 4025 0 0 {name=p131 lab=E15}
 C {lab_wire.sym} 120 3920 1 0 {name=p132 sig_type=std_logic lab=clk}
 C {opin.sym} 270 3965 0 0 {name=p133 lab=IPG15}
 C {opin.sym} 270 4065 0 0 {name=p134 lab=REC15}
-C {row.sym} 95 995 0 0 {name=x6}
-C {row.sym} 95 1260 0 0 {name=x7}
-C {row.sym} 95 1530 0 0 {name=x8}
-C {row.sym} 95 1795 0 0 {name=x9}
-C {row.sym} 95 2115 0 0 {name=x10}
-C {row.sym} 95 2380 0 0 {name=x11}
-C {row.sym} 95 2650 0 0 {name=x12}
-C {row.sym} 95 2915 0 0 {name=x13}
-C {row.sym} 95 3210 0 0 {name=x14}
-C {row.sym} 95 3475 0 0 {name=x15}
-C {row.sym} 95 3745 0 0 {name=x16}
-C {row.sym} 95 4010 0 0 {name=x17}
+C {ENGN1600-Project/row_fixed.sym} 95 -80 0 0 {name=x18}
+C {ENGN1600-Project/row_fixed.sym} 95 185 0 0 {name=x1}
+C {ENGN1600-Project/row_fixed.sym} 95 455 0 0 {name=x3}
+C {ENGN1600-Project/row_fixed.sym} 95 720 0 0 {name=x4}
+C {ENGN1600-Project/row_fixed.sym} 95 995 0 0 {name=x5}
+C {ENGN1600-Project/row_fixed.sym} 95 1260 0 0 {name=x6}
+C {ENGN1600-Project/row_fixed.sym} 95 1530 0 0 {name=x7}
+C {ENGN1600-Project/row_fixed.sym} 95 1795 0 0 {name=x8}
+C {ENGN1600-Project/row_fixed.sym} 95 2115 0 0 {name=x9}
+C {ENGN1600-Project/row_fixed.sym} 95 2380 0 0 {name=x10}
+C {ENGN1600-Project/row_fixed.sym} 95 2650 0 0 {name=x11}
+C {ENGN1600-Project/row_fixed.sym} 95 2915 0 0 {name=x12}
+C {ENGN1600-Project/row_fixed.sym} 95 3210 0 0 {name=x13}
+C {ENGN1600-Project/row_fixed.sym} 95 3475 0 0 {name=x14}
+C {ENGN1600-Project/row_fixed.sym} 95 3745 0 0 {name=x15}
+C {ENGN1600-Project/row_fixed.sym} 95 4010 0 0 {name=x16}
