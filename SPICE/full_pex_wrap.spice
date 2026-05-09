@@ -1,0 +1,68 @@
+* full_pex_wrap.spice -- drop-in replacement for the inline .subckt full
+* in tb_full_chip.spice, using the post-PEX layout (FULL.gds) instead of
+* the schematic-level row.spice + glue.
+*
+* The Magic-extracted SPICE/full_pex.spice defines a `.subckt FULL_pex_cell`
+* whose port list does NOT match the schematic-style `.subckt full`:
+*
+*   FULL_pex_cell (post-PEX, 68 ports after we added the 18 internal-only nets):
+*     CLK VDD
+*     E0 IPG0 REC0 .. E15 IPG15 REC15
+*     RSTN MODE EN0 .. EN15
+*
+*   full (schematic, 67 ports):
+*     IPG0 EN0 MODE clk E0 REC0 RSTn IPG1 EN1 E1 REC1 .. IPG15 EN15 E15 REC15
+*
+* This file defines `.subckt full` with the schematic 67 ports and internally
+* instantiates FULL_pex_cell, mapping ports across.  vdd is declared global
+* so the testbench's V_vdd source reaches the cell's VDD port (lesson learned
+* from row_pex_wrap: without `.global vdd` the wrapper's local vdd floats).
+
+.include /foss/designs/ENGN1600-Project/SPICE/full_pex.spice
+
+.global vdd
+
+.subckt full
++ IPG0 EN0 MODE clk E0 REC0 RSTn
++ IPG1 EN1 E1 REC1
++ IPG2 EN2 E2 REC2
++ IPG3 EN3 E3 REC3
++ IPG4 EN4 E4 REC4
++ IPG5 EN5 E5 REC5
++ IPG6 EN6 E6 REC6
++ IPG7 EN7 E7 REC7
++ IPG8 EN8 E8 REC8
++ IPG9 EN9 E9 REC9
++ IPG10 EN10 E10 REC10
++ IPG11 EN11 E11 REC11
++ IPG12 EN12 E12 REC12
++ IPG13 EN13 E13 REC13
++ IPG14 EN14 E14 REC14
++ IPG15 EN15 E15 REC15
+
+* Map schematic ports onto FULL_pex_cell's port order:
+*   CLK VDD E0 IPG0 REC0 .. E15 IPG15 REC15  RSTN MODE EN0 .. EN15
+Xpex
++ clk vdd
++ E0  IPG0  REC0
++ E1  IPG1  REC1
++ E2  IPG2  REC2
++ E3  IPG3  REC3
++ E4  IPG4  REC4
++ E5  IPG5  REC5
++ E6  IPG6  REC6
++ E7  IPG7  REC7
++ E8  IPG8  REC8
++ E9  IPG9  REC9
++ E10 IPG10 REC10
++ E11 IPG11 REC11
++ E12 IPG12 REC12
++ E13 IPG13 REC13
++ E14 IPG14 REC14
++ E15 IPG15 REC15
++ RSTn MODE
++ EN0 EN1 EN2 EN3 EN4 EN5 EN6 EN7
++ EN8 EN9 EN10 EN11 EN12 EN13 EN14 EN15
++ FULL_pex_cell
+
+.ends full

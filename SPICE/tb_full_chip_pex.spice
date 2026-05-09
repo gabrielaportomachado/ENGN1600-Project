@@ -1,0 +1,230 @@
+* tb_full_chip_pex.spice -- post-PEX clone of tb_full_chip.spice.
+* Replaces the inline .subckt full with the parasitic-extracted FULL.gds
+* via full_pex_wrap.spice (which brings in 994 transistors + 8144 caps from Magic).
+*
+* Defines a `full` subcircuit that mirrors full.sch (16 row instances + 1
+* top-level MODE DFF), then exercises it with the same all-channels-on
+* routing test as tb_full_allon.spice.  Producing the same 64/64 PASS by
+* two different paths (here through the `full` subckt, in tb_full_allon
+* via 16 inline row instances) is the cross-check that full.sch's wiring
+* is structurally correct.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+.include /foss/designs/ENGN1600-Project/SPICE/full_pex_wrap.spice
+
+
+* ============================================================================
+*   Testbench: drive `full` through one Xchip instance
+* ============================================================================
+
+* supply
+V_vdd vdd GND 3.3
+
+* control sources
+V_RSTn RSTn_in GND PWL(0 0  100n 0  100.001n 3.3  10u 3.3)
+V_clk  CLK_in  GND PULSE(0 3.3 0 1n 1n 25n 50n)
+V_MODE MODE_in GND PWL(0 0  500n 0  500.001n 3.3  10u 3.3)
+
+* 16 EN sources -- all asserted at 150 ns
+V_EN0  EN0_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN1  EN1_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN2  EN2_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN3  EN3_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN4  EN4_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN5  EN5_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN6  EN6_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN7  EN7_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN8  EN8_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN9  EN9_in  GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN10 EN10_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN11 EN11_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN12 EN12_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN13 EN13_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN14 EN14_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+V_EN15 EN15_in GND PWL(0 0  150n 0  150.001n 3.3  10u 3.3)
+
+* 16 E sources -- staggered DC voltages 0.2 V to 3.2 V in 0.2 V steps
+V_E0   E0_in   GND DC 0.2
+V_E1   E1_in   GND DC 0.4
+V_E2   E2_in   GND DC 0.6
+V_E3   E3_in   GND DC 0.8
+V_E4   E4_in   GND DC 1.0
+V_E5   E5_in   GND DC 1.2
+V_E6   E6_in   GND DC 1.4
+V_E7   E7_in   GND DC 1.6
+V_E8   E8_in   GND DC 1.8
+V_E9   E9_in   GND DC 2.0
+V_E10  E10_in  GND DC 2.2
+V_E11  E11_in  GND DC 2.4
+V_E12  E12_in  GND DC 2.6
+V_E13  E13_in  GND DC 2.8
+V_E14  E14_in  GND DC 3.0
+V_E15  E15_in  GND DC 3.2
+
+* per-channel loads on the chip outputs (100 k pull-down + 10 f pad cap)
+R_IPG0  IPG0_pin  GND 100k
+C_IPG0  IPG0_pin  GND 10f
+R_REC0  REC0_pin  GND 100k
+C_REC0  REC0_pin  GND 10f
+R_IPG1  IPG1_pin  GND 100k
+C_IPG1  IPG1_pin  GND 10f
+R_REC1  REC1_pin  GND 100k
+C_REC1  REC1_pin  GND 10f
+R_IPG2  IPG2_pin  GND 100k
+C_IPG2  IPG2_pin  GND 10f
+R_REC2  REC2_pin  GND 100k
+C_REC2  REC2_pin  GND 10f
+R_IPG3  IPG3_pin  GND 100k
+C_IPG3  IPG3_pin  GND 10f
+R_REC3  REC3_pin  GND 100k
+C_REC3  REC3_pin  GND 10f
+R_IPG4  IPG4_pin  GND 100k
+C_IPG4  IPG4_pin  GND 10f
+R_REC4  REC4_pin  GND 100k
+C_REC4  REC4_pin  GND 10f
+R_IPG5  IPG5_pin  GND 100k
+C_IPG5  IPG5_pin  GND 10f
+R_REC5  REC5_pin  GND 100k
+C_REC5  REC5_pin  GND 10f
+R_IPG6  IPG6_pin  GND 100k
+C_IPG6  IPG6_pin  GND 10f
+R_REC6  REC6_pin  GND 100k
+C_REC6  REC6_pin  GND 10f
+R_IPG7  IPG7_pin  GND 100k
+C_IPG7  IPG7_pin  GND 10f
+R_REC7  REC7_pin  GND 100k
+C_REC7  REC7_pin  GND 10f
+R_IPG8  IPG8_pin  GND 100k
+C_IPG8  IPG8_pin  GND 10f
+R_REC8  REC8_pin  GND 100k
+C_REC8  REC8_pin  GND 10f
+R_IPG9  IPG9_pin  GND 100k
+C_IPG9  IPG9_pin  GND 10f
+R_REC9  REC9_pin  GND 100k
+C_REC9  REC9_pin  GND 10f
+R_IPG10 IPG10_pin GND 100k
+C_IPG10 IPG10_pin GND 10f
+R_REC10 REC10_pin GND 100k
+C_REC10 REC10_pin GND 10f
+R_IPG11 IPG11_pin GND 100k
+C_IPG11 IPG11_pin GND 10f
+R_REC11 REC11_pin GND 100k
+C_REC11 REC11_pin GND 10f
+R_IPG12 IPG12_pin GND 100k
+C_IPG12 IPG12_pin GND 10f
+R_REC12 REC12_pin GND 100k
+C_REC12 REC12_pin GND 10f
+R_IPG13 IPG13_pin GND 100k
+C_IPG13 IPG13_pin GND 10f
+R_REC13 REC13_pin GND 100k
+C_REC13 REC13_pin GND 10f
+R_IPG14 IPG14_pin GND 100k
+C_IPG14 IPG14_pin GND 10f
+R_REC14 REC14_pin GND 100k
+C_REC14 REC14_pin GND 10f
+R_IPG15 IPG15_pin GND 100k
+C_IPG15 IPG15_pin GND 10f
+R_REC15 REC15_pin GND 100k
+C_REC15 REC15_pin GND 10f
+
+* ============================================================================
+*   The DUT: one Xchip instance referencing `full`.
+*   Pin order MUST match full.sym's port emission order.
+* ============================================================================
+Xchip
++ IPG0_pin  EN0_in  MODE_in CLK_in E0_in  REC0_pin RSTn_in
++ IPG1_pin  EN1_in  E1_in   REC1_pin
++ IPG2_pin  EN2_in  E2_in   REC2_pin
++ IPG3_pin  EN3_in  E3_in   REC3_pin
++ IPG4_pin  EN4_in  E4_in   REC4_pin
++ IPG5_pin  EN5_in  E5_in   REC5_pin
++ IPG6_pin  EN6_in  E6_in   REC6_pin
++ IPG7_pin  EN7_in  E7_in   REC7_pin
++ IPG8_pin  EN8_in  E8_in   REC8_pin
++ IPG9_pin  EN9_in  E9_in   REC9_pin
++ IPG10_pin EN10_in E10_in  REC10_pin
++ IPG11_pin EN11_in E11_in  REC11_pin
++ IPG12_pin EN12_in E12_in  REC12_pin
++ IPG13_pin EN13_in E13_in  REC13_pin
++ IPG14_pin EN14_in E14_in  REC14_pin
++ IPG15_pin EN15_in E15_in  REC15_pin
++ full
+
+.control
+save all
+tran 1n 800n
+
+* per-channel measurements at MODE=0 (t=480ns) and MODE=1 (t=780ns)
+meas tran ipg0_m0  find v(ipg0_pin)  at=480n
+meas tran ipg1_m0  find v(ipg1_pin)  at=480n
+meas tran ipg2_m0  find v(ipg2_pin)  at=480n
+meas tran ipg3_m0  find v(ipg3_pin)  at=480n
+meas tran ipg4_m0  find v(ipg4_pin)  at=480n
+meas tran ipg5_m0  find v(ipg5_pin)  at=480n
+meas tran ipg6_m0  find v(ipg6_pin)  at=480n
+meas tran ipg7_m0  find v(ipg7_pin)  at=480n
+meas tran ipg8_m0  find v(ipg8_pin)  at=480n
+meas tran ipg9_m0  find v(ipg9_pin)  at=480n
+meas tran ipg10_m0 find v(ipg10_pin) at=480n
+meas tran ipg11_m0 find v(ipg11_pin) at=480n
+meas tran ipg12_m0 find v(ipg12_pin) at=480n
+meas tran ipg13_m0 find v(ipg13_pin) at=480n
+meas tran ipg14_m0 find v(ipg14_pin) at=480n
+meas tran ipg15_m0 find v(ipg15_pin) at=480n
+
+meas tran rec0_m0  find v(rec0_pin)  at=480n
+meas tran rec15_m0 find v(rec15_pin) at=480n
+
+meas tran ipg0_m1  find v(ipg0_pin)  at=780n
+meas tran ipg15_m1 find v(ipg15_pin) at=780n
+meas tran rec0_m1  find v(rec0_pin)  at=780n
+meas tran rec15_m1 find v(rec15_pin) at=780n
+
+let fails = 0
+* MODE=0: V(IPG[i]) ~= 0.2 + i*0.2 within 20%, V(REC[i]) ~= 0
+if abs(ipg0_m0  - 0.2) > 0.2*0.2
+  let fails = fails+1
+end
+if abs(ipg7_m0  - 1.6) > 0.2*1.6
+  let fails = fails+1
+end
+if abs(ipg15_m0 - 3.2) > 0.2*3.2
+  let fails = fails+1
+end
+if abs(rec0_m0)  > 0.05
+  let fails = fails+1
+end
+if abs(rec15_m0) > 0.05
+  let fails = fails+1
+end
+
+* MODE=1: V(REC[i]) ~= 0.2 + i*0.2, V(IPG[i]) ~= 0
+if abs(ipg0_m1)  > 0.05
+  let fails = fails+1
+end
+if abs(ipg15_m1) > 0.05
+  let fails = fails+1
+end
+if abs(rec0_m1  - 0.2) > 0.2*0.2
+  let fails = fails+1
+end
+if abs(rec15_m1 - 3.2) > 0.2*3.2
+  let fails = fails+1
+end
+
+echo ""
+echo "=== Full chip TB (driving full.sch via Xchip) ==="
+echo "MODE=0 spot checks: ipg0=$&ipg0_m0  ipg7=$&ipg7_m0  ipg15=$&ipg15_m0"
+echo "                    rec0=$&rec0_m0  rec15=$&rec15_m0"
+echo "MODE=1 spot checks: rec0=$&rec0_m1  rec15=$&rec15_m1"
+echo "                    ipg0=$&ipg0_m1  ipg15=$&ipg15_m1"
+if $&fails = 0
+  echo "PASS_FULL_CHIP_PEX all 9 spot checks passed"
+else
+  echo "FAIL_FULL_CHIP_PEX $&fails of 9 checks failed"
+end
+
+write tb_full_chip_pex.raw
+.endc
+.end

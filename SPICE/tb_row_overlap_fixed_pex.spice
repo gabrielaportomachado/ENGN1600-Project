@@ -1,0 +1,86 @@
+* tb_row_overlap_fixed_pex.spice -- post-PEX overlap test of row_fixed
+* (cross-coupled break-before-make fix, 64-transistor layout in ROW.gds).
+* Same overlap stimulus as the schematic-level tb_row_overlap_fixed.spice
+* but uses row_pex_wrap.spice instead of row.spice + row_fixed.spice.
+*
+* but instantiates row_fixed (cross-coupled break-before-make) instead of row.
+*
+* Identical stimulus, identical loads, identical .meas -- so the ONLY thing
+* that changes between this file and tb_row_overlap.spice is the X-instance
+* line (and the include of row_fixed.spice).  Comparing the two .raw files
+* gives a clean before/after.
+*
+* PASS criterion: overlap_max < 0.3 V across the MODE transition window.
+
+.include /foss/pdks/gf180mcuD/libs.tech/ngspice/design.ngspice
+.lib     /foss/pdks/gf180mcuD/libs.tech/ngspice/sm141064.ngspice typical
+* row.spice provides the AND/DFF/INV/TGATE helper subckts (and the original `row`,
+* which we don't instantiate here).
+.include /foss/designs/ENGN1600-Project/SPICE/row_pex_wrap.spice
+
+
+* --- supplies ---
+V_vdd vdd GND 3.3
+
+* --- digital control sources (waveforms set in .control) ---
+V_EN    EN_in    GND 0
+V_RSTn  RST_in   GND 0
+V_clk   CLK_in   GND 0
+V_MODE  MODE_in  GND 0
+V_MODEb MODEb_in GND 3.3
+
+* --- E held at 3.0 V (DC), distinct from IPG/REC bias so any conduction is visible ---
+V_E E_in GND 3.0
+
+* --- IPG and REC each pulled to GND via 10k; small load cap mimics realistic load ---
+R_IPG IPG GND 10k
+R_REC REC GND 10k
+C_IPG IPG GND 10f
+C_REC REC GND 10f
+
+* --- DUT: row_fixed (drop-in replacement for row, same pin order) ---
+Xrow IPG MODEb_in EN_in EN_cfgb CLK_in E_in MODE_in RST_in REC row
+
+.control
+save all
+
+* --- bring-up: release reset @ 50ns, latch EN=1 with a clock pulse @ 100ns,
+*     then settle until 1us, then trigger the MODE transition at 1us.
+*     MODE rises 0->1 at 1us with 0.1ns edge.
+*     MODEb falls 1->0 with the same edge speed but DELAYED by 200ps to mimic
+*     the extra INV stage between Q and Qb in the top-level DFF.
+*     Cross-coupled fix should hold SW_REC OFF as long as SW_IPG is still ON,
+*     so v(REC) should NOT rise until v(IPG) has fallen.
+
+alter @V_RSTn[PWL] = [ 0 0  50n 0  50.001n 3.3  10u 3.3 ]
+alter @V_EN[PWL]   = [ 0 3.3  10u 3.3 ]
+alter @V_clk[PWL]  = [ 0 0  100n 0  100.001n 3.3  200n 3.3  200.001n 0  10u 0 ]
+
+alter @V_MODE[PWL]  = [ 0 0    1u 0    1.0001u 3.3   10u 3.3 ]
+alter @V_MODEb[PWL] = [ 0 3.3  1.0002u 3.3  1.0003u 0     10u 0   ]
+
+tran 10p 1.5u 0 10p
+
+let overlap_v   = (v(ipg) + v(rec) - abs(v(ipg) - v(rec))) / 2
+let overlap_max = vecmax(overlap_v)
+
+let ipg_max = vecmax(v(ipg))
+let rec_max = vecmax(v(rec))
+
+echo ""
+echo "=== Row overlap test (FIXED row, MODE 0->1 with 200ps Q/Qb skew) ==="
+echo "max v(IPG) over sim         = $&ipg_max V"
+echo "max v(REC) over sim         = $&rec_max V"
+echo "max( min(v(IPG), v(REC)) )  = $&overlap_max V   <-- overlap indicator"
+echo ""
+
+if $&overlap_max > 0.3
+  echo "FAIL_ROW_OVERLAP_FIXED_PEX: overlap_max = $&overlap_max V > 0.3 V"
+  echo "                        (cross-coupling did not eliminate the glitch)"
+else
+  echo "PASS_ROW_OVERLAP_FIXED_PEX: overlap_max = $&overlap_max V (< 0.3 V threshold)"
+end
+
+write tb_row_overlap_fixed_pex.raw
+.endc
+.end

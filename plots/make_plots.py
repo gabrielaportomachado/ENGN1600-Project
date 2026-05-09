@@ -799,6 +799,466 @@ def plot_pex_compare():
     print(f"wrote {out}")
 
 
+# ----------------------- slide-ready single-row post-PEX plot -----------------
+def plot_slide_row_pex():
+    """One-row post-PEX timeline plot for the final slides.
+
+    Replaces the slide-10/11 plot whose y-axis mixed scaled signals
+    (V(IPG)/3 + 1.1, V(MODE)/6.6 + 1.4) with raw signals — making the y-axis
+    meaningless.  Here every trace is plotted in its natural units, with
+    separate panels for the two phases and a digital-control strip on top.
+
+    Data source: SPICE/tb_realistic_pex.raw (real PEX: 174 R + 224 C threaded
+    through ROW.gds, run against tb_realistic_pex.spice).
+    """
+    raw = RawRead(str(SPICE / "tb_realistic_pex.raw"))
+    t = np.asarray(raw.get_axis()) * 1e3  # ms
+
+    v_stim_drv = get(raw, "v(stim_drv)")
+    v_ipg      = get(raw, "v(ipg_pin)")
+    v_e        = get(raw, "v(e_pin)")
+    v_rec      = get(raw, "v(rec_pin)")
+    v_brain    = get(raw, "v(brain_node)")
+    v_mode     = get(raw, "v(mode_in)")
+    v_rstn     = get(raw, "v(rstn_in)")
+    v_clk      = get(raw, "v(clk_in)")
+    v_en       = get(raw, "v(en_in)")
+
+
+    fig = plt.figure(figsize=(14, 8.0))
+    gs = fig.add_gridspec(
+        3, 1,
+        height_ratios=[0.65, 1.2, 1.2],
+        hspace=0.50,
+        left=0.07, right=0.97, top=0.92, bottom=0.07,
+    )
+
+    # ---- digital control strip (full 30 ms, all rows) ------------------------
+    ax_d = fig.add_subplot(gs[0])
+    ax_d.plot(t, v_clk,  color="#888", lw=0.5, alpha=0.7, label="CLK")
+    ax_d.plot(t, v_rstn, color="#2ca02c", lw=1.2, label="RSTn")
+    ax_d.plot(t, v_en,   color="#ff7f0e", lw=1.2, label="EN")
+    ax_d.plot(t, v_mode, color="#d62728", lw=1.4, label="MODE")
+    ax_d.set_xlim(0, 30)
+    ax_d.set_ylim(-0.4, 5.4)
+    ax_d.set_yticks([0, 3.3])
+    ax_d.set_yticklabels(["0 V", "3.3 V"])
+    ax_d.set_xlabel("time [ms]")
+    # No subplot title here -- the phase labels (STIM/DRAIN/RECORD) below
+    # play the role of the title and would collide with the figure suptitle.
+    ax_d.axvspan(0,    4.7,  color="#fde2e4", alpha=0.30, zorder=0)
+    ax_d.axvspan(4.7,  15,   color="#fff3b0", alpha=0.30, zorder=0)
+    ax_d.axvspan(15,   30,   color="#bee1e6", alpha=0.30, zorder=0)
+    ax_d.text( 2.4,  4.4, "STIM (5 biphasic pulses)",     ha="center", fontsize=10, color="#a44", fontweight="bold")
+    ax_d.text( 9.85, 4.4, "DRAIN (Cdl bleed via SW_IPG)", ha="center", fontsize=10, color="#a73", fontweight="bold")
+    ax_d.text(22.5,  4.4, "RECORD (LFP via SW_REC)",      ha="center", fontsize=10, color="#147", fontweight="bold")
+    ax_d.legend(loc="lower right", framealpha=0.92, fontsize=9, ncol=4)
+    ax_d.grid(True, alpha=0.3)
+
+    # ---- stimulation phase: full 0-30 ms timeline showing all 5 pulses -------
+    ax_s = fig.add_subplot(gs[1])
+    sel = (t >= 0) & (t <= 30)
+    ax_s.plot(t[sel], v_stim_drv[sel], color="#888",    lw=0.9, alpha=0.7, label="V(stim_drv) — driver intent")
+    ax_s.plot(t[sel], v_ipg[sel],      color="#1f77b4", lw=1.0,            label="V(IPG_pin) — chip stim input")
+    ax_s.plot(t[sel], v_e[sel],        color="#2ca02c", lw=1.0,            label="V(E_pin) — brain electrode")
+    ax_s.axhline(1.65, color="#999", ls=":", lw=0.8, alpha=0.6)
+    ax_s.axvspan(0,    4.7,  color="#fde2e4", alpha=0.30, zorder=0)
+    ax_s.axvspan(4.7,  15,   color="#fff3b0", alpha=0.30, zorder=0)
+    ax_s.axvspan(15,   30,   color="#bee1e6", alpha=0.30, zorder=0)
+    ax_s.set_xlim(0, 30)
+    ax_s.set_ylim(0.4, 2.9)
+    ax_s.set_xlabel("time [ms]")
+    ax_s.set_ylabel("voltage [V]")
+    ax_s.set_title("(a) Stimulation path — V(stim_drv), V(IPG), V(E) over the full 30 ms run (5 biphasic pulses, then drain, then idle)",
+                   fontsize=10.5, fontweight="bold")
+    ax_s.legend(loc="upper right", framealpha=0.92, fontsize=9, ncol=3)
+    ax_s.grid(True, alpha=0.3)
+
+    # annotation: pp swings (per pulse) from anodic vs cathodic windows
+    cath_window = (t >= 0.55) & (t <= 0.60)
+    anod_window = (t >= 0.65) & (t <= 0.70)
+    pp_drv = v_stim_drv[anod_window].mean() - v_stim_drv[cath_window].mean()
+    pp_ipg = v_ipg[anod_window].mean()      - v_ipg[cath_window].mean()
+    pp_e   = v_e[anod_window].mean()        - v_e[cath_window].mean()
+    ax_s.text(
+        0.02, 0.03,
+        f"per-pulse pp:   drv = {pp_drv:.2f} V    IPG = {pp_ipg:.2f} V    E = {pp_e:.2f} V    (TG Ron + electrode impedance drops most of the swing)",
+        transform=ax_s.transAxes, va="bottom", fontsize=9, family="monospace",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="#fff3b0", alpha=0.9),
+    )
+
+    # ---- recording phase: zoom into the late record window (28-30 ms) where
+    # ---- REC has settled past the 1G·2p amp-pullup time constant and the
+    # ---- 100 µV LFP is the dominant signal.  Plot deviations from 1.65 V in
+    # ---- microvolts so the LFP is actually readable.
+    ax_r = fig.add_subplot(gs[2])
+    sel = (t >= 15) & (t <= 30)
+    ax_r.plot(t[sel], (v_brain[sel] - 1.65) * 1e6, color="#888",    lw=1.0, alpha=0.7,
+              label="V(brain) — LFP source")
+    ax_r.plot(t[sel], (v_rec[sel]   - 1.65) * 1e6, color="#d62728", lw=1.5,
+              label="V(REC_pin) — recording amp input")
+    ax_r.axhline(0, color="#999", ls=":", lw=0.8, alpha=0.6)
+    ax_r.axvspan(15, 30, color="#bee1e6", alpha=0.30, zorder=0)
+    ax_r.set_xlim(15, 30)
+    ax_r.set_ylim(-150, 150)
+    ax_r.set_xlabel("time [ms]   (record phase, MODE = 1)")
+    ax_r.set_ylabel("voltage from 1.65 V bias  [µV]")
+    ax_r.set_title("(b) Recording path — V(REC) tracking the 100 µV LFP through the closed transmission gate",
+                   fontsize=10.5, fontweight="bold")
+    ax_r.legend(loc="upper right", framealpha=0.92, fontsize=9, ncol=2)
+    ax_r.grid(True, alpha=0.3)
+
+    sel_late = (t >= 28.0) & (t <= 30.0)
+    pp_brain = (v_brain[sel_late].max() - v_brain[sel_late].min()) * 1e6
+    pp_rec   = (v_rec[sel_late].max()   - v_rec[sel_late].min()  ) * 1e6
+    ax_r.text(
+        0.02, 0.03,
+        f"late-record pp (28-30 ms):   brain = {pp_brain:5.1f} µV    REC = {pp_rec:5.1f} µV    (LFP transfer ≈ {pp_rec/pp_brain*100:.0f}%)",
+        transform=ax_r.transAxes, va="bottom", fontsize=9, family="monospace",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor="#cdeac0", alpha=0.9),
+    )
+
+    fig.suptitle(
+        "Single-row post-PEX simulation — gf180mcuD, real Magic RC extraction (174 R + 224 C parasitic elements)",
+        fontsize=12, fontweight="bold", y=0.985,
+    )
+
+    out = HERE / "slide_row_pex.png"
+    fig.savefig(out, dpi=160)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+# ----------------------- Randles electrode-tissue model schematic -----------
+def plot_randles_model():
+    """Schematic of the Randles equivalent circuit used in tb_realistic*.spice
+    for the electrode-tissue interface.
+
+    Topology:  V_brain --[R_s]-- tissue_node --(C_dl || R_ct)-- E_pin
+    """
+    fig, ax = plt.subplots(figsize=(14, 9))
+    ax.set_xlim(-1, 15)
+    ax.set_ylim(-2, 9)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+    BRAIN  = "#a44"
+    RANDLE = "#147"
+    CHIP   = "#384"
+    WIRE   = "#222"
+
+    def wire(x0, y0, x1, y1, color=WIRE, lw=2.0):
+        ax.plot([x0, x1], [y0, y1], color=color, lw=lw, solid_capstyle="round", zorder=2)
+
+    def node_dot(x, y, color=WIRE):
+        ax.plot(x, y, "o", color=color, markersize=7, zorder=5)
+
+    def resistor_h(xc, yc, name, value, color=WIRE, length=1.6, h=0.4, label_above=True):
+        n = 7
+        xs = np.linspace(xc - length/2, xc + length/2, n + 1)
+        ys = np.array([yc + (h/2 if i % 2 else -h/2) for i in range(n + 1)])
+        ys[0] = yc; ys[-1] = yc
+        ax.plot(xs, ys, color=color, lw=2.2, zorder=3)
+        if label_above:
+            ax.text(xc, yc + 0.55, f"{name}  =  {value}",
+                    ha="center", va="bottom",
+                    fontsize=12, fontweight="bold", color=color)
+        else:
+            ax.text(xc, yc - 0.55, f"{name}  =  {value}",
+                    ha="center", va="top",
+                    fontsize=12, fontweight="bold", color=color)
+
+    def capacitor_h(xc, yc, name, value, color=WIRE, gap=0.20, plate=0.85, label_above=True):
+        ax.plot([xc - gap/2, xc - gap/2], [yc - plate/2, yc + plate/2],
+                color=color, lw=3.0, zorder=3, solid_capstyle="butt")
+        ax.plot([xc + gap/2, xc + gap/2], [yc - plate/2, yc + plate/2],
+                color=color, lw=3.0, zorder=3, solid_capstyle="butt")
+        if label_above:
+            ax.text(xc, yc + plate/2 + 0.25, f"{name}  =  {value}",
+                    ha="center", va="bottom",
+                    fontsize=12, fontweight="bold", color=color)
+        else:
+            ax.text(xc, yc - plate/2 - 0.25, f"{name}  =  {value}",
+                    ha="center", va="top",
+                    fontsize=12, fontweight="bold", color=color)
+
+    def voltage_source(xc, yc, color=WIRE, r=0.55):
+        circle = plt.Circle((xc, yc), r, fill=False, color=color, lw=2.2, zorder=3)
+        ax.add_patch(circle)
+        xs = np.linspace(xc - 0.32, xc + 0.32, 50)
+        ys = yc + 0.18 * np.sin(2 * np.pi * (xs - xc) / 0.42)
+        ax.plot(xs, ys, color=color, lw=2.0, zorder=4)
+
+    def ground(xc, yc, color=WIRE):
+        ax.plot([xc - 0.42, xc + 0.42], [yc, yc], color=color, lw=2.8, zorder=3)
+        ax.plot([xc - 0.28, xc + 0.28], [yc - 0.16, yc - 0.16], color=color, lw=2.2, zorder=3)
+        ax.plot([xc - 0.14, xc + 0.14], [yc - 0.32, yc - 0.32], color=color, lw=1.6, zorder=3)
+
+    # ====================== layout ============================================
+    Y_RAIL = 3.5
+    X_BRAIN  = 1.3
+    X_TISSUE = 5.0
+    X_EPIN   = 9.5
+
+    Y_TOP    = Y_RAIL + 1.4
+    Y_BOT    = Y_RAIL - 1.4
+
+    # ---- LEFT: V_brain source pulled up to brain_node on the rail ----------
+    voltage_source(X_BRAIN, Y_RAIL - 1.4, color=BRAIN)
+    wire(X_BRAIN, Y_RAIL - 0.85, X_BRAIN, Y_RAIL,         color=BRAIN)
+    wire(X_BRAIN, Y_RAIL - 1.95, X_BRAIN, Y_RAIL - 2.30,  color=BRAIN)
+    ground(X_BRAIN, Y_RAIL - 2.30, color=BRAIN)
+    ax.text(X_BRAIN - 0.85, Y_RAIL - 1.4, "V_brain",
+            ha="right", va="center", fontsize=12, fontweight="bold", color=BRAIN)
+    ax.text(X_BRAIN - 0.85, Y_RAIL - 1.85,
+            "1.65 V + 100 µV ·\nsin(2π · 1 kHz · t)",
+            ha="right", va="top", fontsize=10, color=BRAIN, family="monospace")
+    node_dot(X_BRAIN, Y_RAIL, color=BRAIN)
+    ax.text(X_BRAIN, Y_RAIL + 0.32, "brain_node",
+            ha="center", va="bottom", fontsize=11, fontweight="bold", color=BRAIN)
+
+    # ---- R_s: brain_node -> tissue_node (horizontal) ----------------------
+    wire(X_BRAIN,    Y_RAIL, X_TISSUE - 0.8, Y_RAIL, color=RANDLE)
+    resistor_h((X_BRAIN + X_TISSUE)/2, Y_RAIL, "R_s",  "1 kΩ", color=RANDLE,
+               label_above=False)
+    wire((X_BRAIN + X_TISSUE)/2 + 0.8, Y_RAIL, X_TISSUE, Y_RAIL, color=RANDLE)
+    node_dot(X_TISSUE, Y_RAIL, color=RANDLE)
+    ax.text(X_TISSUE + 0.30, Y_RAIL + 0.30, "tissue_node",
+            ha="left", va="bottom", fontsize=11, fontweight="bold", color=RANDLE)
+
+    # ---- C_dl and R_ct in parallel: tissue_node -> E_pin -----------------
+    # vertical jumps from tissue_node up to Y_TOP and down to Y_BOT
+    wire(X_TISSUE, Y_RAIL, X_TISSUE, Y_TOP, color=RANDLE)
+    wire(X_TISSUE, Y_RAIL, X_TISSUE, Y_BOT, color=RANDLE)
+    # horizontal arms across to E_pin column
+    wire(X_TISSUE, Y_TOP, X_EPIN, Y_TOP, color=RANDLE)
+    wire(X_TISSUE, Y_BOT, X_EPIN, Y_BOT, color=RANDLE)
+    # upper branch: C_dl
+    capacitor_h((X_TISSUE + X_EPIN)/2, Y_TOP, "C_dl",  "300 nF", color=RANDLE,
+                label_above=True)
+    # lower branch: R_ct
+    resistor_h((X_TISSUE + X_EPIN)/2, Y_BOT, "R_ct",  "50 kΩ", color=RANDLE,
+               label_above=False)
+
+    # ---- E_pin column joins both branches and exits to chip --------------
+    wire(X_EPIN, Y_TOP, X_EPIN, Y_BOT, color=RANDLE)
+    wire(X_EPIN, Y_RAIL, X_EPIN + 1.5, Y_RAIL, color=CHIP)
+    node_dot(X_EPIN, Y_RAIL, color=RANDLE)
+    ax.text(X_EPIN - 0.30, Y_RAIL + 0.30, "E_pin",
+            ha="right", va="bottom", fontsize=11, fontweight="bold", color=CHIP)
+
+    # right-side chip box
+    chip_box = plt.Rectangle((X_EPIN + 1.5, Y_RAIL - 0.85), 2.2, 1.7,
+                             fill=True, facecolor="#f0f7f0", edgecolor=CHIP, lw=2.2, zorder=1)
+    ax.add_patch(chip_box)
+    ax.text(X_EPIN + 2.6, Y_RAIL, "chip\n(TG → REC)",
+            ha="center", va="center", fontsize=12, fontweight="bold", color=CHIP)
+
+    # ---- dashed box around the Randles model -----------------------------
+    # Make box wide enough to fully enclose R_s on the left and to give the
+    # value labels room to breathe.
+    BOX_X0   = X_BRAIN + 0.7
+    BOX_X1   = X_EPIN  + 0.6
+    BOX_Y0   = Y_BOT   - 1.30
+    BOX_Y1   = Y_TOP   + 1.30
+    rd_box = plt.Rectangle((BOX_X0, BOX_Y0), BOX_X1 - BOX_X0, BOX_Y1 - BOX_Y0,
+                            fill=False, edgecolor=RANDLE, lw=1.4, ls="--", alpha=0.65, zorder=0)
+    ax.add_patch(rd_box)
+    ax.text(BOX_X0 + 0.15, BOX_Y1 + 0.20,
+            "Randles model — electrode / tissue interface",
+            ha="left", va="bottom", fontsize=11, fontstyle="italic", color=RANDLE)
+
+
+
+    fig.suptitle("Randles equivalent circuit — electrode/tissue interface model used in tb_realistic*.spice",
+                 fontsize=14, fontweight="bold", y=0.97)
+
+    out = HERE / "randles_model.png"
+    fig.savefig(out, dpi=160, bbox_inches="tight")
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+# --------- slide-ready row_fixed pre/post-PEX overlap comparison ---------
+def plot_slide_row_fixed_pex_compare():
+    """Pre-PEX vs post-PEX overlap test for row_fixed (cross-coupled break-
+    before-make fix, the variant currently sitting in ROW.gds).
+    """
+    raw_pre  = RawRead(str(SPICE / "tb_row_overlap_fixed.raw"))
+    raw_post = RawRead(str(SPICE / "tb_row_overlap_fixed_pex.raw"))
+
+    def x(raw):
+        t = np.asarray(raw.get_axis()) * 1e9  # ns
+        return dict(
+            t     = t,
+            mode  = get(raw, "v(mode_in)"),
+            modeb = get(raw, "v(modeb_in)"),
+            ipg   = get(raw, "v(ipg)"),
+            rec   = get(raw, "v(rec)"),
+        )
+    PRE  = x(raw_pre)
+    POST = x(raw_post)
+
+    LO, HI = 999.5, 1003.5
+    threshold = 0.3
+
+    fig = plt.figure(figsize=(13, 7))
+    gs = fig.add_gridspec(
+        2, 2,
+        height_ratios=[0.55, 1.4],
+        hspace=0.40, wspace=0.18,
+        left=0.07, right=0.97, top=0.91, bottom=0.10,
+    )
+
+    def render(D, axd, axa, label, title_color):
+        sel = (D["t"] >= LO) & (D["t"] <= HI)
+        # digital
+        axd.plot(D["t"][sel], D["mode"][sel],  color="#9467bd", lw=2.0, label="V(MODE_cfg)")
+        axd.plot(D["t"][sel], D["modeb"][sel], color="#8c564b", lw=2.0, ls="--", label="V(MODE_cfgb)")
+        axd.set_xlim(LO, HI)
+        axd.set_ylim(-0.4, 3.7)
+        axd.set_yticks([0, 3.3]); axd.set_yticklabels(["0 V", "3.3 V"])
+        axd.set_title(label, fontsize=11, fontweight="bold", color=title_color)
+        axd.grid(True, alpha=0.3)
+        axd.legend(loc="center right", framealpha=0.92, fontsize=8)
+        axd.tick_params(labelbottom=False)
+
+        # analog
+        axa.plot(D["t"][sel], D["ipg"][sel], color="#1f77b4", lw=2.2, label="V(IPG)")
+        axa.plot(D["t"][sel], D["rec"][sel], color="#d62728", lw=2.2, label="V(REC)")
+        overlap = np.minimum(D["ipg"], D["rec"])
+        both = (D["ipg"] > threshold) & (D["rec"] > threshold) & sel
+        axa.fill_between(D["t"], overlap, 0, where=both, color="red", alpha=0.30,
+                         label=f"both > {threshold} V")
+        axa.axhline(threshold, color="red", ls=":", lw=1, alpha=0.7)
+        omax = overlap[sel].max()
+        verdict = "PASS" if omax < threshold else "FAIL"
+        bg = "#cdeac0" if omax < threshold else "lightcoral"
+        axa.text(0.02, 0.95,
+                 f"max( min(IPG, REC) ) = {omax:.3f} V → {verdict}",
+                 transform=axa.transAxes, va="top", fontsize=10, family="monospace",
+                 bbox=dict(boxstyle="round,pad=0.4", facecolor=bg, alpha=0.92))
+        axa.set_xlim(LO, HI)
+        axa.set_ylim(-0.1, 2.4)
+        axa.set_xlabel("time [ns]   (MODE 0 → 1 transition triggered at 1000 ns)")
+        axa.set_ylabel("voltage [V]")
+        axa.grid(True, alpha=0.3)
+        axa.legend(loc="upper right", framealpha=0.92, fontsize=8)
+
+    ax_dL = fig.add_subplot(gs[0, 0])
+    ax_dR = fig.add_subplot(gs[0, 1], sharey=ax_dL)
+    ax_aL = fig.add_subplot(gs[1, 0])
+    ax_aR = fig.add_subplot(gs[1, 1], sharey=ax_aL)
+
+    render(PRE,  ax_dL, ax_aL, "PRE-PEX (schematic, ideal wires)",      "#147")
+    render(POST, ax_dR, ax_aR, "POST-PEX (Magic RC extraction of ROW.gds)", "#a44")
+
+    ax_dL.set_ylabel("digital [V]")
+
+    fig.suptitle(
+        "row_fixed overlap test — cross-coupled break-before-make fix, schematic vs post-PEX",
+        fontsize=13, fontweight="bold", y=0.97)
+
+    out = HERE / "slide_row_fixed_pex_compare.png"
+    fig.savefig(out, dpi=160)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+# --------- slide-ready row_fixed_dt overlap plot (pre-PEX) ----------------
+def plot_slide_row_fixed_dt_overlap():
+    """Single presentation-quality plot of the row_fixed_dt overlap test.
+
+    row_fixed_dt = the cross-coupled break-before-make fix + a 4-INV
+    dead-time delay chain on the cross-coupled feedback path.  The
+    delay chain breaks the simultaneous-on window even when the
+    MODE_cfg/MODE_cfgb edges from the chip-level DFF are skewed by
+    200 ps (the worst-case Q/Qb skew the chip can produce).
+
+    Data source: SPICE/tb_row_overlap_fixed_dt.raw
+    """
+    raw = RawRead(str(SPICE / "tb_row_overlap_fixed_dt.raw"))
+    t = np.asarray(raw.get_axis()) * 1e9  # ns
+    v_mode  = get(raw, "v(mode_in)")
+    v_modeb = get(raw, "v(modeb_in)")
+    v_ipg   = get(raw, "v(ipg)")
+    v_rec   = get(raw, "v(rec)")
+
+    # zoom window centered on the 1 us transition
+    LO, HI = 999.5, 1003.5
+    sel = (t >= LO) & (t <= HI)
+
+    # overlap indicator: per-sample min(IPG, REC).  When both nodes are HIGH
+    # at the same time both TGs conduct and we get an overlap event.
+    overlap = np.minimum(v_ipg, v_rec)
+    overlap_max = overlap[sel].max()
+    threshold   = 0.3
+
+    fig = plt.figure(figsize=(12, 7))
+    gs = fig.add_gridspec(
+        2, 1,
+        height_ratios=[0.6, 1.4],
+        hspace=0.35,
+        left=0.09, right=0.97, top=0.91, bottom=0.10,
+    )
+
+    # === top: MODE / MODEb digital edges, showing the 200 ps skew ===========
+    ax_d = fig.add_subplot(gs[0])
+    ax_d.plot(t[sel], v_mode[sel],  color="#9467bd", lw=2.2, label="V(MODE_cfg) — DFF Q")
+    ax_d.plot(t[sel], v_modeb[sel], color="#8c564b", lw=2.2, ls="--",
+              label="V(MODE_cfgb) — DFF Qb (skewed by 1 INV ≈ 200 ps)")
+    ax_d.axvspan(1000.0, 1000.2, color="#fde2e4", alpha=0.55, zorder=0,
+                 label="200 ps Q/Qb skew window")
+    ax_d.set_xlim(LO, HI)
+    ax_d.set_ylim(-0.4, 3.7)
+    ax_d.set_yticks([0, 3.3])
+    ax_d.set_yticklabels(["0 V", "3.3 V"])
+    ax_d.set_ylabel("digital  [V]")
+    ax_d.set_title("(a) Worst-case MODE 0 → 1 input — 200 ps skew between the chip-level DFF's Q and Qb edges",
+                   fontsize=11, fontweight="bold")
+    ax_d.legend(loc="center right", framealpha=0.92, fontsize=9)
+    ax_d.grid(True, alpha=0.3)
+
+    # === bottom: IPG / REC analog response ==================================
+    ax_a = fig.add_subplot(gs[1])
+    ax_a.plot(t[sel], v_ipg[sel], color="#1f77b4", lw=2.2, label="V(IPG) — stim path")
+    ax_a.plot(t[sel], v_rec[sel], color="#d62728", lw=2.2, label="V(REC) — record path")
+    # shade the overlap region (where min(IPG, REC) is non-negligible)
+    both = (v_ipg > threshold) & (v_rec > threshold) & sel
+    ax_a.fill_between(t, overlap, 0, where=both, color="red", alpha=0.30,
+                      label=f"both > {threshold} V  (TG-overlap event)")
+    ax_a.axhline(threshold, color="red", ls=":", lw=1, alpha=0.7,
+                 label=f"{threshold} V PASS threshold")
+    ax_a.set_xlim(LO, HI)
+    ax_a.set_ylim(-0.1, 2.4)
+    ax_a.set_xlabel("time [ns]   (MODE 0 → 1 transition triggered at 1000 ns)")
+    ax_a.set_ylabel("voltage  [V]")
+    ax_a.set_title(
+        "(b) row_fixed_dt response — dead-time chain on the cross-coupled feedback "
+        "breaks the simultaneous-on window",
+        fontsize=11, fontweight="bold")
+    ax_a.legend(loc="center right", framealpha=0.92, fontsize=9)
+    ax_a.grid(True, alpha=0.3)
+
+    verdict = "PASS" if overlap_max < threshold else "FAIL"
+    bg = "#cdeac0" if overlap_max < threshold else "lightcoral"
+    ax_a.text(
+        0.02, 0.93,
+        f"max( min(V(IPG), V(REC)) ) = {overlap_max:.3f} V    →  {verdict}  "
+        f"(orig row was 1.90 V → {1.90/overlap_max:.0f}× reduction)",
+        transform=ax_a.transAxes, va="top", fontsize=10, family="monospace",
+        bbox=dict(boxstyle="round,pad=0.4", facecolor=bg, alpha=0.92))
+
+    fig.suptitle(
+        "row_fixed_dt — cross-coupled break-before-make + 4-INV dead-time chain  (PRE-PEX, schematic)",
+        fontsize=12, fontweight="bold", y=0.97)
+
+    out = HERE / "slide_row_fixed_dt_overlap.png"
+    fig.savefig(out, dpi=160)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 if __name__ == "__main__":
     plot_tgate_hiz()
     plot_row_corners()
@@ -808,3 +1268,7 @@ if __name__ == "__main__":
     plot_realistic()
     plot_full_chip()
     plot_pex_compare()
+    plot_slide_row_pex()
+    plot_randles_model()
+    plot_slide_row_fixed_dt_overlap()
+    plot_slide_row_fixed_pex_compare()

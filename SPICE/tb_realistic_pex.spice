@@ -15,6 +15,15 @@ V_EN   EN_in   GND PWL(0 0  150n 0  150.001n 3.3  30m 3.3)
 V_MODE  MODE_in  GND PWL(0 0    15m 0    15.0001m 3.3   30m 3.3)
 V_MODEb MODEb_in GND PWL(0 3.3  15m 3.3  15.0001m 0     30m 0)
 
+* Brain LFP: 100 uV sine on 1.65 V mid-rail.  The 1.65 V offset is a
+* modeling shortcut representing "DC offsets already removed by AC-coupling"
+* -- in real silicon the tissue can sit at any potential and the recording
+* chain has an AC-coupling cap to filter DC.  We tried brain at 0 V DC +
+* C_couple cap on the chip side, but the post-PEX cell's OP solver can't
+* handle E-side nodes at 0 V (singular Jacobian on a TG transistor with
+* Vbs ~ 0); the simulation runs but produces meaningless numbers.  Sticking
+* with the simulation-friendly bias here; the LFP transfer behaviour is
+* unchanged either way (only the DC offset on REC_pin changes).
 V_brain brain_node GND SIN(1.65 100u 1k)
 R_s    brain_node tissue_node 1k
 C_dl   tissue_node E_pin 300n
@@ -56,9 +65,21 @@ V_stim stim_drv GND PWL(
 R_drv stim_drv IPG_pin 100
 C_pad_IPG IPG_pin GND 2p
 
+* Recording front-end.  R_amp from REC_pin to bias_amp at 1.65 V provides
+* the DC bias to mid-rail.  10 MOhm represents a typical opamp input
+* impedance; with C_pad = 2 pF the time constant is 20 us.
 V_bias_amp bias_amp GND 1.65
-R_amp REC_pin bias_amp 1G
-C_pad_REC REC_pin GND 2p
+R_amp      REC_pin  bias_amp 10MEG
+C_pad_REC  REC_pin  GND      2p
+
+* OP convergence aids:
+*   reltol/abstol/vntol: tighter than default so the solver doesn't stop
+*     early on a high-impedance node (REC_pin) at ~50 uV off true bias.
+*   itl1: more iterations allowed for DC OP.
+*   NODESET hints REC_pin to its real fixed point so the solver starts
+*     close to 1.65 V instead of from default 0 V.
+.options reltol=1e-6 abstol=1e-15 vntol=1e-9 itl1=500 gmin=1e-15
+.NODESET V(REC_pin)=1.65
 
 Xrow IPG_pin MODEb_in EN_in EN_cfgb CLK_in E_pin MODE_in RSTn_in REC_pin row
 
@@ -77,6 +98,8 @@ meas tran v_e_anod     avg v(E_pin)    from=650u to=700u
 
 meas tran v_rec_during_stim_max max v(REC_pin) from=400u to=14m
 meas tran v_rec_during_stim_min min v(REC_pin) from=400u to=14m
+meas tran v_rec_avg_pre   avg v(REC_pin) from=200u to=400u
+meas tran v_rec_avg_late  avg v(REC_pin) from=28m to=30m
 
 meas tran v_rec_rec_max max v(REC_pin) from=28m to=30m
 meas tran v_rec_rec_min min v(REC_pin) from=28m to=30m
